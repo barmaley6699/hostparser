@@ -14,13 +14,15 @@ if (!$currentDir) { $currentDir = Split-Path $MyInvocation.MyCommand.Path -Paren
 if (!$currentDir) { $currentDir = Get-Location }
 
 $dnsPool = @{
-    'Astra_1'    = '108.165.164.201'
-    'Astra_2'    = '108.165.164.224'
-    'Xbox_Main'  = '176.99.11.77'
-    'Xbox_Alt'   = '80.78.247.254'
-    'GeoHide_1'  = '194.190.11.1'
-    'GeoHide_2'  = '45.155.204.190'
-    'Serverel'   = '103.27.157.38'
+    'Comss_Primary' = '83.220.169.155'
+    'Comss_Secondary' = '212.109.195.93'
+    'Astra_1'       = '108.165.164.201'
+    'Astra_2'       = '108.165.164.224'
+    'Xbox_Main'     = '176.99.11.77'
+    'Xbox_Alt'      = '80.78.247.254'
+    'GeoHide_1'     = '194.190.11.1'
+    'GeoHide_2'     = '45.155.204.190'
+    'Serverel'      = '103.27.157.38'
 }
 
 $inputFile = Join-Path $currentDir 'domainlist.txt'
