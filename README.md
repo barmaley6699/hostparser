@@ -50,3 +50,16 @@
 3. **DNS Cache:** Рекомендуется всегда подтверждать сброс кэша в конце работы скрипта, чтобы изменения вступили в силу мгновенно.
 
 ---
+
+### 📚 Источники данных / Sources
+
+Скрипт автоматически собирает и объединяет актуальные списки из следующих проверенных репозиториев:
+
+* **Adobe Blocklist:** [ignaciocastro/a-dove-is-dumb](https://github.com/ignaciocastro/a-dove-is-dumb) — основной список для блокировки телеметрии и проверки лицензий Adobe.
+* **Unified Hosts:** [StevenBlack/hosts](https://github.com/StevenBlack/hosts) — легендарный и самый полный список (реклама, малварь, фишинг).
+* **AdGuard Mobile:** [r-a-y/mobile-hosts](https://github.com/r-a-y/mobile-hosts) — оптимизированные списки AdGuard.
+* **Malware & Tracking:**
+    * [URLHaus](https://urlhaus.abuse.ch/) — активные вредоносные ресурсы.
+    * [AdAway](https://adaway.org/hosts.txt) — популярный список для мобильных устройств.
+    * [Peter Lowe's List](https://pgl.yoyo.org/adservers/) — рекламные сервера.
+    * [Firebog.net](https://v.firebog.net/hosts/) — подборки EasyList и EasyPrivacy.
