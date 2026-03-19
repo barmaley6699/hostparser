@@ -87,12 +87,22 @@ foreach ($url in $urlsToProcess) {
 
 # --- 2. ПАРСИНГ ТВОЕГО СПИСКА (DOMAINLIST.TXT) ---
 if (Test-Path $localFile) {
-    $localDomains = Get-Content $localFile | ForEach-Object { $_.Trim() } | Where-Object { $_ -and -not $_.StartsWith("#") }
-    Write-Host "`n>>> Resolving your domains..." -ForegroundColor Cyan
+    Write-Host "`n>>> Processing your domainlist.txt..." -ForegroundColor Cyan
+    $lines = Get-Content $localFile
     
-    foreach ($domain in $localDomains) {
-        $cleanDomain = ($domain -replace '^https?://', '' -replace '/.*$', '').Split("/")[0].ToLower()
-        if ([string]::IsNullOrWhiteSpace($cleanDomain) -or $seenDomains.Contains($cleanDomain)) { continue }
+    foreach ($line in $lines) {
+        $trimmed = $line.Trim()
+        if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
+
+        # Если это твой заголовок (начинается с #) — просто копируем его в итоговый файл
+        if ($trimmed.StartsWith("#")) {
+            $finalHosts.Add("`n$trimmed")
+            continue
+        }
+
+        # Если это домен — резолвим его
+        $cleanDomain = ($trimmed -replace '^https?://', '' -replace '/.*$', '').Split("/")[0].ToLower()
+        if ($seenDomains.Contains($cleanDomain)) { continue }
 
         Write-Host "`nTarget: $cleanDomain" -ForegroundColor White
         $candidates = @()
@@ -108,16 +118,15 @@ if (Test-Path $localFile) {
                     if ($ip -ne $dnsPool[$dnsName] -and $ip -ne "127.0.0.1" -and $ip -ne "0.0.0.0") {
                         if ($pingCache.ContainsKey($ip)) {
                             $latency = $pingCache[$ip]
-                            $msg = if ($latency -eq 999) { "No Ping" } else { "$($latency)ms" }
-                            Write-Host "Found $ip (Cached: $msg)" -ForegroundColor Gray
+                            $candidates += [PSCustomObject]@{ IP = $ip; Latency = $latency; DNS = $dnsName }
+                            Write-Host "Found $ip (Cached)" -ForegroundColor Gray
                         } else {
                             $ping = Test-Connection -ComputerName $ip -Count 1 -ErrorAction SilentlyContinue
                             $latency = if ($ping) { $ping.ResponseTime } else { 999 }
                             $pingCache[$ip] = $latency
-                            $msg = if ($latency -eq 999) { "No Ping" } else { "$($latency)ms" }
-                            Write-Host "Found $ip ($msg)" -ForegroundColor DarkGreen
+                            $candidates += [PSCustomObject]@{ IP = $ip; Latency = $latency; DNS = $dnsName }
+                            Write-Host "Found $ip ($($latency)ms)" -ForegroundColor DarkGreen
                         }
-                        $candidates += [PSCustomObject]@{ IP = $ip; Latency = $latency; DNS = $dnsName }
                     }
                 }
             } catch {}
@@ -125,31 +134,18 @@ if (Test-Path $localFile) {
 
         if ($candidates.Count -gt 0) {
             $best = $candidates | Sort-Object Latency | Select-Object -First 1
-            # ВОЗВРАЩАЕМ КРАСИВУЮ РАЗБИВКУ
-            $finalHosts.Add("`n# --- $cleanDomain (via $($best.DNS)) ---")
             $finalHosts.Add("$($best.IP.PadRight(15)) $cleanDomain")
             $seenDomains.Add($cleanDomain) | Out-Null
-            Write-Host "Result: $($best.IP) via $($best.DNS)" -ForegroundColor Green
+            Write-Host "Result: $($best.IP)" -ForegroundColor Green
         }
     }
 }
 
-# --- 3. СОХРАНЕНИЕ И ЗАВЕРШЕНИЕ ---
+# --- 3. СОХРАНЕНИЕ ---
 $finalHosts | Out-File $mergedFile -Encoding utf8
 Write-Host "`n--- ГОТОВО! ---" -ForegroundColor Yellow
-Write-Host "Файл создан: $mergedFile" -ForegroundColor Gray
 
 if ($openPath) {
     explorer.exe /select,"$mergedFile"
     explorer.exe "$sysHostsDir"
-    
-    Write-Host "`n[!] Инструкция:" -ForegroundColor Cyan
-    Write-Host "1. Скопируй содержимое '$mergedFile'" -ForegroundColor White
-    Write-Host "2. Вставь в системный файл hosts ($sysHostsDir\hosts)" -ForegroundColor White
-}
-
-Write-Host "`n------------------------------------------------" -ForegroundColor Gray
-if (Get-Answer "Сбросить кэш DNS прямо сейчас? (FlushDNS)") {
-    ipconfig /flushdns
-    Write-Host "Кэш DNS успешно очищен!" -ForegroundColor Green
 }

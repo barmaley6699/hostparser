@@ -70,18 +70,27 @@ fi
 
 # --- 2. ПАРСИНГ ТВОЕГО СПИСКА (DOMAINLIST.TXT) ---
 if [[ -f "$LOCAL_FILE" ]]; then
-    echo -e "\n${CYAN}>>> Resolving your domains...${NC}"
+    echo -e "\n${CYAN}>>> Processing your domainlist.txt...${NC}"
     typeset -A ping_cache
 
-    while read -r domain || [[ -n "$domain" ]]; do
-        [[ -z "$domain" || "$domain" == "#"* ]] && continue
-        clean_domain=$(echo "$domain" | sed -E 's|^https?://||; s|/.*$||' | tr '[:upper:]' '[:lower:]' | xargs)
+    # Читаем файл построчно, сохраняя комментарии
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        trimmed=$(echo "$line" | xargs)
+        [[ -z "$trimmed" ]] && continue
+
+        # Если строка — твой комментарий (заголовок сервиса)
+        if [[ "$trimmed" == "#"* ]]; then
+            echo -e "\n$trimmed" >> "$MERGED_FILE"
+            continue
+        fi
+
+        # Если это домен
+        clean_domain=$(echo "$trimmed" | sed -E 's|^https?://||; s|/.*$||' | tr '[:upper:]' '[:lower:]' | xargs)
         [[ -n "${seen_domains[$clean_domain]}" ]] && continue
 
         echo -e "\nTarget: $clean_domain"
         best_ip=""
         best_lat=999
-        best_dns=""
 
         for dns in "${DNS_POOL[@]}"; do
             echo -n -e "  -> DNS $dns... "
@@ -90,7 +99,7 @@ if [[ -f "$LOCAL_FILE" ]]; then
             if [[ -n "$ip" ]]; then
                 if [[ -n "${ping_cache[$ip]}" ]]; then
                     lat=${ping_cache[$ip]}
-                    echo -n -e "${GRAY}Found $ip (Cached: ${lat}ms)${NC}"
+                    echo -n -e "${GRAY}Found $ip (Cached)${NC}"
                 else
                     lat=$(ping -c 1 -t 1 "$ip" 2>/dev/null | awk -F'[=/]' '/time=/ {print $10}' | cut -d. -f1)
                     [[ -z "$lat" ]] && lat=999
@@ -101,7 +110,6 @@ if [[ -f "$LOCAL_FILE" ]]; then
                 if (( lat < best_lat )); then
                     best_lat=$lat
                     best_ip=$ip
-                    best_dns=$dns
                 fi
             else
                 echo -n -e "${YELLOW}No IP${NC}"
@@ -110,8 +118,6 @@ if [[ -f "$LOCAL_FILE" ]]; then
         done
 
         if [[ -n "$best_ip" ]]; then
-            # ВОТ ТУТ КРАСИВАЯ РАЗБИВКА КАК В ВИНДЕ
-            echo -e "\n# --- $clean_domain (via $best_dns) ---" >> "$MERGED_FILE"
             printf "%-15s %s\n" "$best_ip" "$clean_domain" >> "$MERGED_FILE"
             seen_domains[$clean_domain]=1
             echo -e "${GREEN}Result: $best_ip${NC}"
