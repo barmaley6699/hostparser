@@ -1,4 +1,5 @@
-﻿openai.com
+﻿qwen.ai
+openai.com
 chatgpt.com
 sora.com
 google.com
@@ -31,3 +32,4 @@ instagram.com
 facebook.com
 telegram.org
 t.me
+deepseek.com

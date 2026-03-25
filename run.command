@@ -13,6 +13,7 @@ MERGED_FILE="hosts_merged.txt"
 GREEN='\033[0;32m'
 CYAN='\033[0;36m'
 YELLOW='\033[1;33m'
+RED='\033[0;31m'
 GRAY='\033[0;90m'
 NC='\033[0m'
 
@@ -32,7 +33,7 @@ else
     CORE_DOMAINS=("${DEFAULT_CORE[@]}")
 fi
 
-echo -e "${CYAN}================ MULTI-DNS OPTIMIZED (macOS) ===============${NC}"
+echo -e "${CYAN}================ MULTI-DNS + SMART GEO-CHECK (macOS) ===============${NC}"
 
 get_answer() {
     echo -n -e "$1 [y/n]: "
@@ -56,7 +57,7 @@ if get_answer "2. Добавить списки РЕКЛАМЫ (StevenBlack, Fir
 if get_answer "3. Включить ВЫБОРОЧНЫЙ ГЛУБОКИЙ ПОИСК?"; then DEEP_SCAN=true; fi
 if get_answer "4. Открыть папки по завершении?"; then OPEN_PATH=true; fi
 
-echo -e "${CYAN}========================================================${NC}"
+echo -e "${CYAN}====================================================================${NC}"
 
 # Подготовка файла
 echo "# Generated: $(date)" > "$MERGED_FILE"
@@ -95,16 +96,12 @@ if [[ -f "$LOCAL_FILE" ]]; then
             continue
         fi
 
-        # Чистый домен
         base_domain=$(echo "$trimmed" | sed -E 's|^https?://||; s|/.*$||' | tr '[:upper:]' '[:lower:]')
-
-        # ОПТИМИЗАЦИЯ: Если домен уже есть в финальном списке, пропускаем его сразу
         [[ -n "${seen_domains[$base_domain]}" ]] && continue
 
         targets=("$base_domain")
         seen_domains[$base_domain]=1
 
-        # ОПТИМИЗАЦИЯ: Запускаем Deep Scan только если корень в списке и еще не сканировался
         if [[ "$DEEP_SCAN" == true ]]; then
             for core in "${CORE_DOMAINS[@]}"; do
                 if [[ "$base_domain" == "$core" && -z "${deep_scanned_roots[$base_domain]}" ]]; then
@@ -121,28 +118,19 @@ if [[ -f "$LOCAL_FILE" ]]; then
             done
         fi
 
-        # Резолв отобранных доменов
         for target in "${targets[@]}"; do
             echo -n -e "Resolving: $target "
-            best_ip=""
-            best_lat=999
-
+            best_ip=""; best_lat=999
             for dns in "${DNS_POOL[@]}"; do
                 ip=$(dig +short "@$dns" "$target" | grep -E '^[0-9.]+$' | tail -n1)
                 if [[ -n "$ip" ]]; then
-                    # ОПТИМИЗАЦИЯ: Берем задержку из кэша, если IP уже проверяли
-                    if [[ -n "${ping_cache[$ip]}" ]]; then
-                        lat=${ping_cache[$ip]}
+                    if [[ -n "${ping_cache[$ip]}" ]]; then lat=${ping_cache[$ip]}
                     else
                         lat=$(ping -c 1 -t 1 "$ip" 2>/dev/null | awk -F'[=/]' '/time=/ {print $10}' | cut -d. -f1)
                         [[ -z "$lat" ]] && lat=999
                         ping_cache[$ip]=$lat
                     fi
-                    
-                    if (( lat < best_lat )); then
-                        best_lat=$lat
-                        best_ip=$ip
-                    fi
+                    if (( lat < best_lat )); then best_lat=$lat; best_ip=$ip; fi
                 fi
             done
 
@@ -150,12 +138,48 @@ if [[ -f "$LOCAL_FILE" ]]; then
                 printf "%-15s %s\n" "$best_ip" "$target" >> "$MERGED_FILE"
                 echo -e "${GREEN}OK ($best_ip)${NC}"
             else
-                unset "seen_domains[$target]" # Чтобы можно было перерезолвить в след. раз
+                unset "seen_domains[$target]"
                 echo -e "${YELLOW}Skip${NC}"
             fi
         done
     done < "$LOCAL_FILE"
 fi
+
+# --- 3. SMART GEO-CHECK (HTTP ТЕСТ ИЗ CORE_DOMAINS) ---
+echo -e "\n${CYAN}>>> TESTING REAL ACCESS (SMART GEO-CHECK)...${NC}"
+for site in "${CORE_DOMAINS[@]}"; do
+    site=$(echo "$site" | xargs)
+    [[ -z "$site" ]] && continue
+    
+    printf "Testing %-35s " "$site"
+    status=$(curl -o /dev/null -s -w "%{http_code}" --max-time 5 "https://$site")
+    
+    if [[ "$status" =~ ^(200|301|302|204|405)$ ]]; then
+        echo -e "${GREEN}SUCCESS ($status)${NC}"
+    else
+        echo -e "${RED}FAILED ($status)${NC}"
+        if get_answer "  [!] Найти альтернативный IP для $site?"; then
+            echo -e "  ${GRAY}Searching alternative IPs...${NC}"
+            ips=($(for dns in "${DNS_POOL[@]}"; do dig +short "@$dns" "$site" | grep -E '^[0-9.]+$'; done | sort -u))
+            
+            found=false
+            for alt_ip in "${ips[@]}"; do
+                echo -n -e "    Trying $alt_ip: "
+                alt_status=$(curl -o /dev/null -s -w "%{http_code}" --max-time 4 --resolve "$site:443:$alt_ip" "https://$site")
+                if [[ "$alt_status" =~ ^(200|301|302|405)$ ]]; then
+                    echo -e "${GREEN}WORKS! ($alt_status)${NC}"
+                    # Обновляем в файле (macOS sed требует пустую строку для -i)
+                    sed -i '' "s/.*[[:space:]]$site$/$alt_ip $site/" "$MERGED_FILE"
+                    found=true
+                    break
+                else
+                    echo -e "${RED}Fail ($alt_status)${NC}"
+                fi
+            done
+            [[ "$found" == false ]] && echo -e "  ${RED}No working alternatives found.${NC}"
+        fi
+    fi
+done
 
 echo -e "\n${YELLOW}--- ГОТОВО! ---${NC}"
 [[ "$OPEN_PATH" == true ]] && { open -R "$MERGED_FILE"; open "/etc"; }

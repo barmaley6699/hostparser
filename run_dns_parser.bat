@@ -7,7 +7,7 @@ pause
 exit /b
 #>
 
-# --- КОНФИГУРАЦИЯ ПУТЕЙ ---
+# --- 1. КОНФИГУРАЦИЯ ---
 $currentDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
 if (!$currentDir) { $currentDir = Get-Location }
 
@@ -15,7 +15,7 @@ $localFile       = Join-Path $currentDir "domainlist.txt"
 $coreFile        = Join-Path $currentDir "core_domains.txt"
 $mergedFile      = Join-Path $currentDir "hosts_merged.txt"
 
-# Дефолтные кор-домены (если файл core_domains.txt отсутствует)
+# Дефолтные кор-домены
 $defaultCore = @(
     "openai.com", "chatgpt.com", "sora.com", "google.com", "gemini.google", "anthropic.com", 
     "claude.ai", "x.ai", "grok.com", "elevenlabs.io", "codeium.com", "windsurf.com", 
@@ -25,7 +25,6 @@ $defaultCore = @(
     "instagram.com", "facebook.com", "telegram.org", "t.me"
 )
 
-# Загрузка кор-доменов из файла
 if (Test-Path $coreFile) {
     $coreDomains = Get-Content $coreFile | Where-Object { $_ -match "\." -and $_ -notmatch "^#" }
 } else {
@@ -33,12 +32,10 @@ if (Test-Path $coreFile) {
     $coreDomains = $defaultCore
 }
 
-# Настройки DNS и списков
 $dnsPool = [ordered]@{
     'Comss_1'    = '83.220.169.155'; 'Comss_2'    = '212.109.195.93'
     'Serverel'   = '103.27.157.38';  'Astra_1'    = '108.165.164.201'
     'Astra_2'    = '108.165.164.224'; 'GeoHide_1'  = '194.190.11.1'
-    'GeoHide_2'  = '45.155.204.190'
 }
 
 $adobeUrl = "https://a.dove.isdumb.one/list.txt"
@@ -47,13 +44,11 @@ $adblockUrls = @(
     "https://v.firebog.net/hosts/Easyprivacy.txt"
 )
 
-# Глобальные хранилища для оптимизации
+# Хранилища данных
 $finalHosts = New-Object System.Collections.Generic.List[string]
 $seenDomains = New-Object System.Collections.Generic.HashSet[string]
 $deepScannedRoots = New-Object System.Collections.Generic.HashSet[string]
 $pingCache = @{} # IP -> Latency
-
-$finalHosts.Add("# Generated: $(Get-Date)")
 
 function Get-Answer($msg) {
     Write-Host "------------------------------------------------" -ForegroundColor Gray
@@ -75,14 +70,16 @@ function Get-ExternalSubdomains($domain) {
     return @()
 }
 
-Write-Host "================ MULTI-DNS OPTIMIZED (Windows) ===============" -ForegroundColor Cyan
+Write-Host "================ MULTI-DNS + GEO-CHECK (Win) ===============" -ForegroundColor Cyan
 $addAdobe   = Get-Answer "1. Добавить блокировку Adobe?"
 $addAds     = Get-Answer "2. Добавить списки РЕКЛАМЫ?"
 $deepScan   = Get-Answer "3. Включить ВЫБОРОЧНЫЙ ГЛУБОКИЙ ПОИСК?"
 $openPath   = Get-Answer "4. Открыть папки после завершения?"
-Write-Host "==========================================================" -ForegroundColor Cyan
+Write-Host "============================================================" -ForegroundColor Cyan
 
-# --- 1. ПРЕДВАРИТЕЛЬНАЯ ЗАГРУЗКА БЛОКЛИСТОВ (0.0.0.0) ---
+$finalHosts.Add("# Generated: $(Get-Date)")
+
+# --- 2. ЗАГРУЗКА БЛОКЛИСТОВ ---
 $urlsToBlock = @()
 if ($addAdobe) { $urlsToBlock += $adobeUrl }
 if ($addAds)   { $urlsToBlock += $adblockUrls }
@@ -106,27 +103,22 @@ foreach ($url in $urlsToBlock) {
     } catch { Write-Host "Skip" -ForegroundColor Yellow }
 }
 
-# --- 2. ОБРАБОТКА ТВОЕГО СПИСКА ---
+# --- 3. ОБРАБОТКА DOMAINLIST.TXT ---
 if (Test-Path $localFile) {
     Write-Host "`n>>> Processing domainlist.txt..." -ForegroundColor Cyan
     $lines = Get-Content $localFile
-
     foreach ($line in $lines) {
         $trimmed = $line.Trim()
         if ([string]::IsNullOrWhiteSpace($trimmed)) { continue }
         if ($trimmed.StartsWith("#")) { $finalHosts.Add("`n$trimmed"); continue }
 
-        # Извлекаем чистый домен
         $baseDomain = ($trimmed -replace '^https?://', '' -replace '/.*$', '').Split("/")[0].ToLower()
-        
-        # ОПТИМИЗАЦИЯ: Если домен уже в итоговом списке (из блоклистов или выше), пропускаем его
         if ($seenDomains.Contains($baseDomain)) { continue }
 
         $targets = New-Object System.Collections.Generic.List[string]
         $targets.Add($baseDomain)
         $seenDomains.Add($baseDomain) | Out-Null
 
-        # ОПТИМИЗАЦИЯ: Deep Scan только для корней и только если еще не сканировали
         if ($deepScan -and ($coreDomains -contains $baseDomain) -and $deepScannedRoots.Add($baseDomain)) {
             $subs = Get-ExternalSubdomains $baseDomain
             foreach ($s in $subs) {
@@ -134,11 +126,9 @@ if (Test-Path $localFile) {
             }
         }
 
-        # Резолв отобранных целей
         foreach ($target in $targets) {
             Write-Host "Resolving: $target " -NoNewline -ForegroundColor White
             $candidates = @()
-
             foreach ($dnsName in $dnsPool.Keys) {
                 try {
                     $query = nslookup $target $dnsPool[$dnsName] 2>$null
@@ -146,10 +136,8 @@ if (Test-Path $localFile) {
                     if ($ipMatch) {
                         $ip = $ipMatch.ToString().Split()[-1]
                         if ($ip -match "^\d" -and $ip -ne $dnsPool[$dnsName]) {
-                            # ОПТИМИЗАЦИЯ: берем задержку из кэша, если IP уже проверяли
-                            if ($pingCache.ContainsKey($ip)) {
-                                $lat = $pingCache[$ip]
-                            } else {
+                            if ($pingCache.ContainsKey($ip)) { $lat = $pingCache[$ip] }
+                            else {
                                 $p = Test-Connection $ip -Count 1 -ErrorAction SilentlyContinue
                                 $lat = if ($p) { $p.ResponseTime } else { 999 }
                                 $pingCache[$ip] = $lat
@@ -159,13 +147,12 @@ if (Test-Path $localFile) {
                     }
                 } catch {}
             }
-
             if ($candidates.Count -gt 0) {
                 $best = $candidates | Sort-Object Latency | Select-Object -First 1
                 $finalHosts.Add("$($best.IP.PadRight(15)) $target")
                 Write-Host "OK" -ForegroundColor Green
             } else {
-                $seenDomains.Remove($target) | Out-Null # Убираем, чтобы можно было перерезолвить потом
+                $seenDomains.Remove($target) | Out-Null
                 Write-Host "Skip" -ForegroundColor Yellow
             }
         }
@@ -173,8 +160,90 @@ if (Test-Path $localFile) {
 }
 
 $finalHosts | Out-File $mergedFile -Encoding utf8
-Write-Host "`n--- ГОТОВО! ---" -ForegroundColor Yellow
-if ($openPath) { 
-    explorer.exe /select,"$mergedFile"
-    explorer.exe "C:\Windows\System32\drivers\etc"
+
+# --- 4. SMART GEO-CHECK С ПЕРЕБОРОМ IP ---
+Write-Host "`n>>> TESTING REAL ACCESS (SMART GEO-CHECK)..." -ForegroundColor Cyan
+
+if (Test-Path $coreFile) {
+    $testSites = Get-Content $coreFile | Where-Object { $_ -match "\." -and $_ -notmatch "^#" }
+} else {
+    $testSites = $defaultCore
 }
+
+$failedDomains = New-Object System.Collections.Generic.List[string]
+
+foreach ($site in $testSites) {
+    $site = $site.Trim().ToLower()
+    if ([string]::IsNullOrWhiteSpace($site)) { continue }
+
+    Write-Host "Testing $site... ".PadRight(35) -NoNewline
+    
+    # 1. Первая попытка (с текущим IP из hosts)
+    $check = curl.exe -I -s --max-time 5 "https://$site" | Select-String "HTTP/"
+    
+    $isWorking = $false
+    if ($check) {
+        $code = $check.ToString().Split(' ')[1]
+        if ($code -match "200|301|302|204") {
+            Write-Host "SUCCESS ($code)" -ForegroundColor Green
+            $isWorking = $true
+        } else {
+            Write-Host "FAILED ($code)" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host "NO RESPONSE" -ForegroundColor Red
+    }
+
+    # 2. Если не сработало — предлагаем найти замену
+    if (-not $isWorking) {
+        Write-Host "  [!] $site заблокирован. Попробовать другие IP из пула DNS?" -NoNewline -ForegroundColor Cyan
+        $choice = Read-Host " [Y/N]"
+        if ($choice -match "[yYдД]") {
+            Write-Host "  Searching alternatives for $site..." -ForegroundColor DarkGray
+            
+            # Собираем ВСЕ уникальные IP от всех DNS для этого домена
+            $allCandidates = @()
+            foreach ($dnsName in $dnsPool.Keys) {
+                $q = nslookup $site $dnsPool[$dnsName] 2>$null
+                $m = $q | Select-String -Pattern "\d{1,3}(\.\d{1,3}){3}" | Select-Object -Last 1
+                if ($m) { 
+                    $newIp = $m.ToString().Split()[-1]
+                    if ($newIp -match "^\d" -and $newIp -ne $dnsPool[$dnsName]) {
+                        $allCandidates += $newIp
+                    }
+                }
+            }
+            $allCandidates = $allCandidates | Select-Object -Unique
+
+            $foundNew = $false
+            foreach ($altIp in $allCandidates) {
+                Write-Host "    Trying IP: $altIp ... " -NoNewline -ForegroundColor DarkGray
+                # Тестируем альтернативный IP через curl --resolve
+                $altCheck = curl.exe -I -s --max-time 4 --resolve "$($site):443:$altIp" "https://$site" | Select-String "HTTP/"
+                
+                if ($altCheck -and $altCheck.ToString() -match "200|301|302") {
+                    $newCode = $altCheck.ToString().Split(' ')[1]
+                    Write-Host "WORKS! ($newCode)" -ForegroundColor Green
+                    
+                    # ОБНОВЛЯЕМ HOSTS прямо в памяти (или записываем в файл)
+                    # Находим строку с этим доменом и меняем IP
+                    for ($i=0; $i -lt $finalHosts.Count; $i++) {
+                        if ($finalHosts[$i] -match "\s+$site$") {
+                            $finalHosts[$i] = "$($altIp.PadRight(15)) $site"
+                            break
+                        }
+                    }
+                    $foundNew = $true
+                    break
+                } else {
+                    Write-Host "Failed" -ForegroundColor Red
+                }
+            }
+            if (-not $foundNew) { Write-Host "    [!] Рабочих альтернатив не найдено." -ForegroundColor Red }
+        }
+    }
+}
+
+# Перезаписываем файл, если были исправления
+$finalHosts | Out-File $mergedFile -Encoding utf8
+Write-Host "`n--- ОБНОВЛЕННЫЙ ФАЙЛ СОХРАНЕН: $mergedFile ---" -ForegroundColor Yellow
