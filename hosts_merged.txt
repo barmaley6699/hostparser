@@ -1,6 +1,6 @@
 ﻿# ================================================================
-# Generated : 2026-03-31 10:38:53
-# DoH pool  : GeoHide, Comss, Xbox_1, Xbox_2, Mafioznik, Astra
+# Generated : 2026-03-31 15:04:02
+# DoH pool  : 
 # ================================================================
 # --- QwenAI ---
 
@@ -329,6 +329,7 @@
 77.239.114.0    fitbit.google.com
 
 # --- 4pda ---
+107.150.34.100  4pda.to
 
 # --- Weather.com ---
 45.155.204.190  upsx.weather.com
@@ -415,6 +416,35 @@
 157.240.245.174 www.instagram.com
 
 # --- Telegram Web & API ---
+149.154.167.220 api.telegram.org
+149.154.167.220 flora.web.telegram.org
+149.154.167.220 kws1-1.web.telegram.org
+149.154.167.220 kws1.web.telegram.org
+149.154.167.220 kws2-1.web.telegram.org
+149.154.167.220 kws2.web.telegram.org
+149.154.167.220 kws4-1.web.telegram.org
+149.154.167.220 kws4.web.telegram.org
+149.154.167.220 kws5-1.web.telegram.org
+149.154.167.220 kws5.web.telegram.org
+149.154.167.220 pluto-1.web.telegram.org
+149.154.167.220 pluto.web.telegram.org
+149.154.167.220 t.me
+149.154.167.220 td.telegram.org
+149.154.167.220 telegram.dog
+149.154.167.220 telegram.me
+149.154.167.220 telegram.org
+149.154.167.220 telegram.space
+149.154.167.220 telesco.pe
+149.154.167.220 tg.dev
+149.154.167.220 venus.web.telegram.org
+149.154.167.220 web.telegram.org
+149.154.167.220 zws1-1.web.telegram.org
+149.154.167.220 zws1.web.telegram.org
+149.154.167.220 zws2-1.web.telegram.org
+149.154.167.220 zws2.web.telegram.org
+149.154.167.220 zws4-1.web.telegram.org
+149.154.167.220 zws5-1.web.telegram.org
+149.154.167.220 zws5.web.telegram.org
 
 # --- Notion ---
 45.155.204.190  calendar.notion.com

@@ -28,18 +28,31 @@ $mergedFile = Join-Path $currentDir "hosts_merged.txt"
 
 # DoH пул. Каждый сервер опрашивается через DNS-over-HTTPS.
 # Fallback на nslookup если DoH недоступен.
-# DNS пул.
-# ProxyIPs — список IP которые сервер использует для проксирования трафика.
-# Если сервер вернул один из своих ProxyIPs для домена — он его проксирует.
-# Такой IP имеет наивысший приоритет: берём сразу без HTTP-тестов.
-$dnsPool = [ordered]@{
-    'GeoHide'   = @{ IP = '194.190.11.1';   ProxyIPs = @('45.155.204.190','95.182.120.241','31.25.239.132') }
-    'Comss'     = @{ IP = '83.220.169.155'; ProxyIPs = @('45.155.204.190','95.182.120.241') }
-    'Xbox_1'    = @{ IP = '111.88.96.50';   ProxyIPs = @('77.239.114.0','77.239.113.0') }
-    'Xbox_2'    = @{ IP = '111.88.96.51';   ProxyIPs = @('77.239.114.0','77.239.113.0') }
-    'Mafioznik' = @{ IP = '212.109.195.93'; ProxyIPs = @('45.155.204.190','95.182.120.241','103.27.157.38') }
-    'Astra'     = @{ IP = '108.165.164.201';ProxyIPs = @('77.239.114.0','77.239.113.0','45.155.204.190','108.165.164.201') }
+# DNS серверы для резолвинга
+$dnsServers = [ordered]@{
+    'GeoHide'   = '194.190.11.1'
+    'Comss'     = '83.220.169.155'
+    'Xbox_1'    = '111.88.96.50'
+    'Xbox_2'    = '111.88.96.51'
+    'Mafioznik' = '212.109.195.93'
+    'Astra'     = '108.165.164.201'
 }
+
+# Единый список proxy IP — все IP которые bypass DNS серверы используют для проксирования.
+# Включает:
+#   - IPv4 самих DNS серверов (они могут сами выступать proxy)
+#   - IP из статических hosts файлов (собираются в шаге 1)
+# Если nslookup вернул IP из этого списка — домен проксируется, IP рабочий.
+$proxyIpSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+# Заранее добавляем IPv4 самих DNS серверов
+@('194.190.11.1','83.220.169.155','111.88.96.50','111.88.96.51',
+  '212.109.195.93','108.165.164.201',
+  '45.155.204.190','95.182.120.241','31.25.239.132',
+  '77.239.114.0','77.239.113.0','103.27.157.38',
+  '108.165.164.224','31.25.239.132') | ForEach-Object { [void]$proxyIpSet.Add($_) }
+
+# Кэш пинга
+$pingCache = @{}
 
 # Статические hosts — приоритетный источник.
 # Первый файл имеет наивысший приоритет (не перезаписывается).
@@ -47,14 +60,9 @@ $staticHostsUrls = @(
     "https://raw.githubusercontent.com/ASTRACAT2022/host-DNS/refs/heads/main/base_hosts.txt",
     "https://raw.githubusercontent.com/Internet-Helper/GeoHideDNS/refs/heads/main/hosts/hosts",
     "https://freedom.mafioznik.xyz/file/hosts",
-    "https://raw.githubusercontent.com/ImMALWARE/dns.malw.link/refs/heads/master/hosts"
+    "https://raw.githubusercontent.com/ImMALWARE/dns.malw.link/refs/heads/master/hosts",
+    "https://raw.githubusercontent.com/HolyLightRU/HolyZapret/refs/heads/main/lists/hosts-list.txt"
 )
-
-# IP которые являются прокси bypass-серверов — curl из-за пределов России
-# не может их протестировать (000). Это ожидаемо и не является ошибкой.
-$knownProxyIPs = @('77.239.114.0','77.239.113.0','45.155.204.190','95.182.120.241',
-                   '31.25.239.132','103.27.157.38','108.165.164.201',
-                   '31.7.60.154','31.7.60.155','31.7.60.156','31.7.60.157','179.43.148.133')
 
 $adobeUrl = "https://a.dove.isdumb.one/list.txt"
 
@@ -97,24 +105,6 @@ function Get-Answer($msg) {
     return $ans -match "[yYдД]"
 }
 
-# DoH запрос (тихий — если не работает, просто падаем на nslookup)
-function Resolve-ViaDoH([string]$domain, [string]$dohUrl, [bool]$skipCert) {
-    $curlArgs = @('-s', '--max-time', '4', '-H', 'Accept: application/dns-json')
-    if ($skipCert) { $curlArgs += '-k' }
-    $url = "${dohUrl}?name=${domain}&type=A"
-    try {
-        $raw = & curl.exe @curlArgs $url 2>$null
-        $rawStr = if ($raw -is [array]) { $raw -join '' } else { [string]$raw }
-        if (-not $rawStr) { return @() }
-        $json = $rawStr | ConvertFrom-Json -EA Stop
-        if ($json.Status -ne 0 -or -not $json.Answer) { return @() }
-        return @($json.Answer |
-            Where-Object { $_.type -eq 1 } |
-            ForEach-Object { [string]$_.data.Trim() } |
-            Where-Object { $_ -match '^\d{1,3}(?:\.\d{1,3}){3}$' } |
-            Where-Object { $_ -notmatch '^(0\.|127\.|169\.254\.)' })
-    } catch { return @() }
-}
 
 # DNS резолвинг через nslookup
 function Resolve-ViaNslookup([string]$domain, [string]$dnsIp) {
@@ -136,84 +126,94 @@ function Resolve-DomainEntry([string]$target) {
         return "$($staticIp.PadRight(15)) $target"
     }
 
-    # Приоритет 2: опрашиваем DNS серверы
-    # Ключевая логика:
-    #   Если сервер вернул СВОЙ proxy IP — он проксирует этот домен.
-    #   Такой ответ надёжнее чем обычный DNS ответ — берём с наивысшим приоритетом.
-    $votes      = [System.Collections.Generic.Dictionary[string,int]]::new([System.StringComparer]::Ordinal)
-    $proxyVotes = [System.Collections.Generic.Dictionary[string,int]]::new([System.StringComparer]::Ordinal)
+    # Приоритет 2: резолвим через все DNS серверы
+    # Логика:
+    #   - Собираем все IP которые вернули серверы
+    #   - Если IP есть в $proxyIpSet — это bypass IP (сервер проксирует домен)
+    #   - Среди proxy IP выбираем с лучшим пингом
+    #   - Если proxy IP нет — мажоритарное голосование среди всех
+
+    $allIps     = [System.Collections.Generic.Dictionary[string,int]]::new([System.StringComparer]::Ordinal)
+    $proxyFound = [System.Collections.Generic.List[string]]::new()
     $dnsLog     = [ordered]@{}
 
-    foreach ($name in $dnsPool.Keys) {
-        $srv = $dnsPool[$name]
-
-        # Сначала пробуем DoH (тихо), потом nslookup
-        $ips = Resolve-ViaDoH $target $srv.DoH $false
-        $src = if ($ips.Count -gt 0) { 'DoH' } else {
-            $ips = Resolve-ViaNslookup $target $srv.IP
-            'nslookup'
-        }
-
-        $dnsLog[$name] = @{ IPs = $ips; Src = $src }
+    foreach ($name in $dnsServers.Keys) {
+        $dnsIp = $dnsServers[$name]
+        $ips   = Resolve-ViaNslookup $target $dnsIp
+        $dnsLog[$name] = $ips
 
         if ($ips.Count -gt 0) {
             $primary = [string]$ips[0]
+            if ($allIps.ContainsKey($primary)) { $allIps[$primary]++ }
+            else { $allIps[$primary] = 1 }
 
-            # Голосование общее
-            if ($votes.ContainsKey($primary)) { $votes[$primary]++ }
-            else { $votes[$primary] = 1 }
-
-            # Отдельное голосование только за proxy IP
-            if ($srv.ProxyIPs -contains $primary) {
-                if ($proxyVotes.ContainsKey($primary)) { $proxyVotes[$primary]++ }
-                else { $proxyVotes[$primary] = 1 }
+            if ($proxyIpSet.Contains($primary) -and -not $proxyFound.Contains($primary)) {
+                $proxyFound.Add($primary)
             }
         }
     }
 
     # Вывод
     foreach ($name in $dnsLog.Keys) {
-        $e       = $dnsLog[$name]
-        $str     = if ($e.IPs.Count -gt 0) { $e.IPs -join ', ' } else { '—' }
-        $isProxy = $e.IPs.Count -gt 0 -and ($dnsPool[$name].ProxyIPs -contains [string]$e.IPs[0])
-        $color   = if ($isProxy) { 'Green' } elseif ($e.Src -eq 'DoH') { 'DarkCyan' } else { 'DarkGray' }
-        $tag     = if ($isProxy) { '[PROXY]' } else { "[$($e.Src)]" }
-        Write-Host ("    [{0,-9}]{1,-9} {2}" -f $name, $tag, $str) -ForegroundColor $color
+        $ips     = $dnsLog[$name]
+        $str     = if ($ips.Count -gt 0) { $ips -join ', ' } else { '—' }
+        $primary = if ($ips.Count -gt 0) { [string]$ips[0] } else { '' }
+        $isProxy = $proxyIpSet.Contains($primary)
+        $color   = if ($isProxy) { 'Green' } else { 'DarkGray' }
+        $tag     = if ($isProxy) { '[PROXY]' } else { '[dns]  ' }
+        Write-Host ("    [{0,-9}]{1} {2}" -f $name, $tag, $str) -ForegroundColor $color
     }
 
-    if ($votes.Count -eq 0) {
+    if ($allIps.Count -eq 0) {
         Write-Host "    => NO IP" -ForegroundColor Red
         return $null
     }
 
     $chosenIp = $null
 
-    if ($proxyVotes.Count -gt 0) {
-        # Есть proxy IP — берём самый популярный среди них
-        $bestProxyVotes = ($proxyVotes.Values | Measure-Object -Maximum).Maximum
-        $topProxy = New-Object System.Collections.Generic.List[string]
-        foreach ($k in @($proxyVotes.Keys)) {
-            if ($proxyVotes[$k] -eq $bestProxyVotes) { $topProxy.Add([string]$k) }
+    if ($proxyFound.Count -gt 0) {
+        # Есть bypass IP — выбираем лучший по пингу
+        $bestIp = [string]$proxyFound[0]
+        $bestMs = 99999
+
+        if ($proxyFound.Count -gt 1) {
+            foreach ($pip in $proxyFound) {
+                if ($pingCache.ContainsKey($pip)) {
+                    $ms = $pingCache[$pip]
+                } else {
+                    $p  = Test-Connection $pip -Count 1 -EA SilentlyContinue
+                    $ms = if ($p) { [int]$p.ResponseTime } else { 9999 }
+                    $pingCache[$pip] = $ms
+                }
+                Write-Host ("    [PING] {0,-17} {1}ms" -f $pip, $ms) -ForegroundColor DarkGray
+                if ($ms -lt $bestMs) { $bestMs = $ms; $bestIp = [string]$pip }
+            }
+            Write-Host ("    => PROXY (fastest): {0} ({1}ms)" -f $bestIp, $bestMs) -ForegroundColor Magenta
+        } else {
+            Write-Host ("    => PROXY: {0}" -f $bestIp) -ForegroundColor Magenta
         }
-        $chosenIp = [string]$topProxy[0]
-        Write-Host ("    => PROXY [{0} серверов]: {1}" -f $bestProxyVotes, $chosenIp) -ForegroundColor Magenta
+        $chosenIp = $bestIp
+
     } else {
         # Нет proxy IP — мажоритарное голосование
-        $maxVotes = ($votes.Values | Measure-Object -Maximum).Maximum
-        $topList  = New-Object System.Collections.Generic.List[string]
-        foreach ($k in @($votes.Keys)) {
-            if ($votes[$k] -eq $maxVotes) { $topList.Add([string]$k) }
+        $maxV    = ($allIps.Values | Measure-Object -Maximum).Maximum
+        $topList = New-Object System.Collections.Generic.List[string]
+        foreach ($k in @($allIps.Keys)) {
+            if ($allIps[$k] -eq $maxV) { $topList.Add([string]$k) }
         }
 
         if ($topList.Count -eq 1) {
             $chosenIp = [string]$topList[0]
-            Write-Host ("    => VOTE [{0}/{1}]: {2}" -f $maxVotes, $dnsPool.Count, $chosenIp) -ForegroundColor Cyan
+            Write-Host ("    => VOTE [{0}/{1}]: {2}" -f $maxV, $dnsServers.Count, $chosenIp) -ForegroundColor Cyan
         } else {
-            # Ничья — пинг
             $bestMs = 99999
             foreach ($ip in $topList) {
-                $p  = Test-Connection $ip -Count 1 -EA SilentlyContinue
-                $ms = if ($p) { [int]$p.ResponseTime } else { 9999 }
+                if ($pingCache.ContainsKey($ip)) { $ms = $pingCache[$ip] }
+                else {
+                    $p  = Test-Connection $ip -Count 1 -EA SilentlyContinue
+                    $ms = if ($p) { [int]$p.ResponseTime } else { 9999 }
+                    $pingCache[$ip] = $ms
+                }
                 Write-Host ("    [PING] {0,-17} {1}ms" -f $ip, $ms) -ForegroundColor DarkGray
                 if ($ms -lt $bestMs) { $bestMs = $ms; $chosenIp = [string]$ip }
             }
@@ -223,7 +223,6 @@ function Resolve-DomainEntry([string]$target) {
 
     return "$($chosenIp.PadRight(15)) $target"
 }
-
 function Get-ExternalSubdomains([string]$rootDomain) {
     Write-Host "    [crt.sh] $rootDomain ..." -NoNewline -ForegroundColor DarkCyan
     $url = "https://crt.sh/?q=%25.$rootDomain&output=json"
@@ -273,7 +272,7 @@ if (Test-Path $localFile) {
         $rootCount = @($domainLines | Where-Object { ($_.Trim() -split '\.').Count -eq 2 }).Count
         $etaSec += $rootCount * 45
     }
-    Write-Host ("  DoH серверов     : {0}" -f $dnsPool.Count) -ForegroundColor Cyan
+    Write-Host ("  DNS серверов     : {0}" -f $dnsServers.Count) -ForegroundColor Cyan
     Write-Host ("  Доменов в списке : {0}" -f $domainCount) -ForegroundColor Cyan
     Write-Host ("  Ожидаемое время  : ~{0}" -f (Format-Duration $etaSec)) -ForegroundColor Cyan
     Write-Host ""
@@ -320,6 +319,13 @@ foreach ($url in $staticHostsUrls) {
         Write-Host "$count доменов" -ForegroundColor Green
     } catch { Write-Host "ОШИБКА: $($_.Exception.Message)" -ForegroundColor Red }
 }
+
+# Добавляем все IP из статических hosts в proxyIpSet
+$addedToProxy = 0
+foreach ($ip in @($staticIpMap.Values)) {
+    if ([void]$proxyIpSet.Add([string]$ip)) { $addedToProxy++ }
+}
+Write-Host ("  Proxy IP пул обновлён: {0} уникальных IP" -f $proxyIpSet.Count) -ForegroundColor DarkGray
 Write-Host ""
 
 # ================================================================
@@ -451,7 +457,7 @@ foreach ($site in $finalCheckDomains) {
     }
 
     # Bypass proxy IPs — не тестируем curl снаружи, это прокси
-    if ($knownProxyIPs -contains $hostsIp) {
+    if ($proxyIpSet.Contains($hostsIp)) {
         Write-Host ("{0} PROXY" -f $label) -ForegroundColor Cyan
         $proxy++; continue
     }
