@@ -1,0 +1,523 @@
+﻿# ================================================================
+# Generated : 2026-03-31 10:38:53
+# DoH pool  : GeoHide, Comss, Xbox_1, Xbox_2, Mafioznik, Astra
+# ================================================================
+# --- QwenAI ---
+
+# --- OpenAI ChatGPT ---
+45.155.204.190  cdn.auth0.com
+45.155.204.190  ab.chatgpt.com
+45.155.204.190  android.chat.openai.com
+45.155.204.190  api.openai.com
+45.155.204.190  arena.openai.com
+45.155.204.190  auth.openai.com
+45.155.204.190  auth0.openai.com
+45.155.204.190  beta.api.openai.com
+45.155.204.190  beta.openai.com
+45.155.204.190  blog.openai.com
+45.155.204.190  cdn.oaistatic.com
+45.155.204.190  cdn.openai.com
+45.155.204.190  chat.openai.com
+77.239.114.0    chatgpt.com
+45.155.204.190  community.openai.com
+45.155.204.190  files.oaiusercontent.com
+45.155.204.190  help.openai.com
+45.155.204.190  ios.chat.openai.com
+45.155.204.190  labs.openai.com
+77.239.114.0    oaistatic.com
+77.239.114.0    openai.com
+45.155.204.190  operator.chatgpt.com
+45.155.204.190  platform.api.openai.com
+45.155.204.190  platform.openai.com
+45.155.204.190  sora.chatgpt.com
+77.239.114.0    sora.com
+45.155.204.190  tcr9i.chat.openai.com
+45.155.204.190  videos.openai.com
+45.155.204.190  webrtc.chatgpt.com
+45.155.204.190  www.chatgpt.com
+45.155.204.190  www.openai.com
+
+# --- Google Gemini AI ---
+45.155.204.190  ai.google.dev
+45.155.204.190  aisandbox-pa.googleapis.com
+45.155.204.190  aistudio.google.com
+45.155.204.190  aitestkitchen.withgoogle.com
+45.155.204.190  alkalicore-pa.clients6.google.com
+45.155.204.190  alkalimakersuite-pa.clients6.google.com
+45.155.204.190  apis.google.com
+45.155.204.190  assistant-s3-pa.googleapis.com
+45.155.204.190  bard.google.com
+45.155.204.190  daily-cloudcode-pa.googleapis.com
+45.155.204.190  deepmind.com
+45.155.204.190  deepmind.google
+45.155.204.190  developerprofiles-pa.googleapis.com
+77.239.114.0    fitbit-pa.googleapis.com
+77.239.114.0    fitbitvestibuleshim-pa.googleapis.com
+45.155.204.190  geller-pa.googleapis.com
+45.155.204.190  gemini.google
+45.155.204.190  gemini.google.com
+45.155.204.190  generativeai.google
+45.155.204.190  generativelanguage.googleapis.com
+45.155.204.190  jules.google
+45.155.204.190  jules.google.com
+45.155.204.190  labs.google
+45.155.204.190  labs.google.com
+45.155.204.190  lookerstudio.google.com
+45.155.204.190  makersuite.google.com
+45.155.204.190  notebooklm-pa.googleapis.com
+45.155.204.190  notebooklm.google
+45.155.204.190  notebooklm.google.com
+45.155.204.190  o.pki.goog
+45.155.204.190  opal.google
+45.155.204.190  opal.google.com
+45.155.204.190  opal.withgoogle.com
+45.155.204.190  people-pa.clients6.google.com
+45.155.204.190  proactivebackend-pa.googleapis.com
+45.155.204.190  robinfrontend-pa.googleapis.com
+45.155.204.190  signaler-pa.clients6.google.com
+45.155.204.190  stitch.withgoogle.com
+45.155.204.190  suggestqueries.google.com
+45.155.204.190  waa-pa.clients6.google.com
+45.155.204.190  webchannel-alkalimakersuite-pa.clients6.google.com
+
+# --- Microsoft Copilot Xbox ---
+77.239.114.0    copilot.microsoft.com
+45.155.204.190  designer.microsoft.com
+45.155.204.190  designerapp.officeapps.live.com
+45.155.204.190  ecs.office.com
+77.239.114.0    edgeservices.bing.com
+77.239.114.0    rewards.bing.com
+77.239.114.0    sydney.bing.com
+45.155.204.190  xboxdesignlab.xbox.com
+77.239.114.0    xgpuweb.gssv-play-prod.xboxlive.com
+77.239.114.0    xgpuwebf2p.gssv-play-prod.xboxlive.com
+77.239.114.0    xsts.auth.xboxlive.com
+
+# --- GitHub Copilot ---
+77.239.114.0    api.github.com
+103.27.157.38   api.individual.githubcopilot.com
+77.239.114.0    githubcopilot.com
+103.27.157.38   proxy.individual.githubcopilot.com
+
+# --- Anthropic Claude ---
+45.155.204.190  a-api.anthropic.com
+45.155.204.190  a-cdn.anthropic.com
+45.155.204.190  anthropic.com
+77.239.114.0    api.anthropic.com
+45.155.204.190  api.claude.ai
+45.155.204.190  api.console.anthropic.com
+45.155.204.190  auth.anthropic.com
+77.239.114.0    claude.ai
+77.239.114.0    console.anthropic.com
+45.155.204.190  s-cdn.anthropic.com
+45.155.204.190  statsig.anthropic.com
+45.155.204.190  status.anthropic.com
+45.155.204.190  support.anthropic.com
+45.155.204.190  www.anthropic.com
+45.155.204.190  www.claude.ai
+
+# --- X.ai Grok ---
+45.155.204.190  accounts.x.ai
+45.155.204.190  api.x.ai
+45.155.204.190  asia-south1-livekit.grok.com
+45.155.204.190  assets.grok.com
+45.155.204.190  assets.x.ai
+45.155.204.190  console.x.ai
+45.155.204.190  data.x.ai
+45.155.204.190  deferred-chat.x.ai
+45.155.204.190  docs.x.ai
+45.155.204.190  eu-west-1.api.x.ai
+77.239.114.0    grok.com
+45.155.204.190  grok.x.ai
+45.155.204.190  imgen.x.ai
+45.155.204.190  jf.x.ai
+45.155.204.190  livekit.grok.com
+45.155.204.190  login.x.ai
+45.155.204.190  ssff.grok.com
+45.155.204.190  status.x.ai
+45.155.204.190  transcription.grok-v2.x.ai
+45.155.204.190  trust.x.ai
+45.155.204.190  typeahead.grok.com
+45.155.204.190  us-east-1.api.x.ai
+45.155.204.190  us-east-4-raw.api.x.ai
+45.155.204.190  us-south-1-pltr.api.x.ai
+45.155.204.190  us-west-1-raw.api.x.ai
+45.155.204.190  us-west-1.api.x.ai
+45.155.204.190  www.grok.com
+45.155.204.190  www.x.ai
+
+# --- ElevenLabs ---
+45.155.204.190  api.elevenlabs.io
+45.155.204.190  api.us.elevenlabs.io
+45.155.204.190  eleven-public-cdn.elevenlabs.io
+77.239.114.0    elevenlabs.io
+77.239.114.0    elevenreader.io
+45.155.204.190  help.elevenlabs.io
+45.155.204.190  payload.elevenlabs.io
+45.155.204.190  try.elevenlabs.io
+45.155.204.190  www.elevenlabs.io
+
+# --- Codeium & Windsurf ---
+77.239.114.0    codeium.com
+45.155.204.190  codeiumdata.com
+45.155.204.190  inference.codeium.com
+45.155.204.190  marketplace.windsurf.com
+45.155.204.190  server.codeium.com
+45.155.204.190  unleash.codeium.com
+45.155.204.190  web-backend.codeium.com
+45.155.204.190  windsurf-stable.codeium.com
+45.155.204.190  windsurf-telemetry.codeium.com
+77.239.114.0    windsurf.com
+
+# --- DeepL ---
+45.155.204.190  api-free.deepl.com
+45.155.204.190  api.deepl.com
+45.155.204.190  auth.deepl.com
+45.155.204.190  backend.deepl.com
+45.155.204.190  checkout.www.deepl.com
+45.155.204.190  clearance.deepl.com
+45.155.204.190  community-auth.deepl.com
+77.239.114.0    deepl.com
+45.155.204.190  developers.deepl.com
+45.155.204.190  dict-audio.deepl.com
+45.155.204.190  dict.deepl.com
+45.155.204.190  errortracking.deepl.com
+45.155.204.190  experimentation-grpc.deepl.com
+45.155.204.190  experimentation.deepl.com
+45.155.204.190  gtm.deepl.com
+45.155.204.190  home.deepl.com
+45.155.204.190  hs.deepl.com
+45.155.204.190  ita-free.app.deepl.com
+45.155.204.190  ita-free.www.deepl.com
+45.155.204.190  login-wall.deepl.com
+45.155.204.190  oneshot-free.www.deepl.com
+45.155.204.190  ott.deepl.com
+45.155.204.190  s.deepl.com
+45.155.204.190  shield.deepl.com
+45.155.204.190  sl.deepl.com
+45.155.204.190  static.deepl.com
+45.155.204.190  support.deepl.com
+45.155.204.190  w.deepl.com
+45.155.204.190  write-free.www.deepl.com
+45.155.204.190  www.deepl.com
+103.27.157.38   www2.deepl.com
+
+# --- Trae.ai ---
+45.155.204.190  api-sg-central.trae.ai
+45.155.204.190  api.trae.ai
+77.239.114.0    api16-normal-alisg.mchost.guru
+77.239.114.0    trae-api-sg.mchost.guru
+
+# --- Supercell Games ---
+77.239.114.0    accounts.supercell.com
+77.239.114.0    cdn.id.supercell.com
+77.239.114.0    clashofclans.inbox.supercell.com
+77.239.114.0    game-assets.brawlstarsgame.com
+77.239.114.0    game-assets.clashofclans.com
+77.239.114.0    game-assets.clashroyaleapp.com
+77.239.114.0    game.brawlstarsgame.com
+108.165.164.201 game.clashroyaleapp.com
+31.25.239.132   game.mocogame.com
+77.239.114.0    game.squadbustersgame.com
+31.7.60.155     gamea.clashofclans.com
+77.239.114.0    security.id.supercell.com
+77.239.114.0    store.supercell.com
+
+# --- Epic Games ---
+
+# --- JetBrains ---
+45.155.204.190  academy.jetbrains.com
+77.239.114.0    account.jetbrains.com
+77.239.114.0    api.jetbrains.ai
+45.155.204.190  blog.jetbrains.com
+45.155.204.190  blogs.jetbrains.com
+45.155.204.190  cdn.jetbrains.com
+45.155.204.190  cai.jetbrains.com
+45.155.204.190  cloudconfig.jetbrains.com
+45.155.204.190  code-with-me.jetbrains.com
+45.155.204.190  codewithme-lobby.api.jetbrains.com
+45.155.204.190  codewithme-relay-europe-north1-1.api.jetbrains.com
+45.155.204.190  codewithme-relay-europe-north1-2.api.jetbrains.com
+45.155.204.190  confluence.jetbrains.com
+45.155.204.190  data.services.jetbrains.com
+77.239.114.0    datalore.jetbrains.com
+45.155.204.190  download-cdn.jetbrains.com
+45.155.204.190  downloads.marketplace.jetbrains.com
+45.155.204.190  ea.jetbrains.com
+45.155.204.190  eap.jetbrains.com
+45.155.204.190  eu-1.jetbrains.space
+45.155.204.190  fleet-relay.api.jetbrains.com
+45.155.204.190  hub.jetbrains.com
+45.155.204.190  jetbrains.com
+45.155.204.190  jetbrains.space
+45.155.204.190  lservice.jetbrains.com
+45.155.204.190  marketplace.jetbrains.com
+45.155.204.190  myjetbrains.com
+45.155.204.190  oauth.account.jetbrains.com
+45.155.204.190  package-search.jetbrains.com
+45.155.204.190  pkg-cdn.jetbrains.space
+77.239.114.0    plugins.jetbrains.com
+45.155.204.190  resources.jetbrains.com
+45.155.204.190  sales.jetbrains.com
+45.155.204.190  support.jetbrains.com
+45.155.204.190  teamcity.jetbrains.com
+45.155.204.190  uploads.jetbrains.com
+45.155.204.190  www.jetbrains.com
+45.155.204.190  www.jetbrains.space
+45.155.204.190  youtrack.jetbrains.com
+
+# --- Linear.app ---
+45.155.204.190  client-api.linear.app
+45.155.204.190  constellation.linear.app
+77.239.114.0    linear.app
+45.155.204.190  public.linear.app
+45.155.204.190  s.linear.app
+45.155.204.190  static.linear.app
+45.155.204.190  uploads.linear.app
+
+# --- Tidal ---
+103.27.157.38   api.tidal.com
+103.27.157.38   auth.tidal.com
+103.27.157.38   dd.tidal.com
+103.27.157.38   fsu.fa.tidal.com
+103.27.157.38   images.tidal.com
+103.27.157.38   link.tidal.com
+103.27.157.38   listen.tidal.com
+103.27.157.38   login.tidal.com
+103.27.157.38   resources.tidal.com
+77.239.114.0    tidal.com
+
+# --- Spotify ---
+45.155.204.190  accounts.scdn.co
+45.155.204.190  accounts.spotify.com
+45.155.204.190  aet.spotify.com
+45.155.204.190  api-partner.spotify.com
+45.155.204.190  api.spotify.com
+45.155.204.190  audio-fa.scdn.co
+45.155.204.190  canvaz.scdn.co
+45.155.204.190  encore.scdn.co
+45.155.204.190  gew1-dealer.spotify.com
+45.155.204.190  gew1-spclient.spotify.com
+45.155.204.190  i.scdn.co
+45.155.204.190  login5.spotify.com
+45.155.204.190  open-exp.spotifycdn.com
+45.155.204.190  open.spotify.com
+45.155.204.190  spclient.wg.spotify.com
+45.155.204.190  spotifycdn.com
+45.155.204.190  spotifycdn.net
+45.155.204.190  www-growth.scdn.co
+45.155.204.190  www.spotify.com
+
+# --- Deezer ---
+45.155.204.190  account.deezer.com
+45.155.204.190  api.deezer.com
+45.155.204.190  auth.deezer.com
+45.155.204.190  connect.deezer.com
+77.239.114.0    deezer.com
+77.239.114.0    dzcdn.net
+45.155.204.190  images.deezer.com
+45.155.204.190  media.deezer.com
+45.155.204.190  payment.deezer.com
+45.155.204.190  pipe.deezer.com
+45.155.204.190  preview.deezer.com
+45.155.204.190  stream.deezer.com
+45.155.204.190  support.deezer.com
+45.155.204.190  www.deezer.com
+
+# --- Fitbit Google Fit ---
+77.239.114.0    api.fitbit.com
+77.239.114.0    fitbit.google.com
+
+# --- 4pda ---
+
+# --- Weather.com ---
+45.155.204.190  upsx.weather.com
+77.239.114.0    weather.com
+
+# --- Weather Underground ---
+45.155.204.190  w-x.co
+45.155.204.190  wund.com
+45.155.204.190  wunderground.com
+45.155.204.190  wxug.com
+
+# --- Twitch ---
+77.239.114.0    gql.twitch.tv
+77.239.114.0    usher.ttvnw.net
+
+# --- TikTok ---
+77.239.114.0    www.tiktok.com
+
+# --- Badoo ---
+45.155.204.190  badoo.app
+45.155.204.190  badoo.com
+45.155.204.190  badoocdn.com
+45.155.204.190  consent.badoo.com
+45.155.204.190  eu1.ecdn2.badoocdn.com
+45.155.204.190  www.badoo.com
+
+# --- Broadcom ---
+77.239.114.0    access.broadcom.com
+77.239.114.0    knowledge.broadcom.com
+77.239.114.0    profile.broadcom.com
+77.239.114.0    support.broadcom.com
+
+# --- Canva ---
+77.239.114.0    canva.com
+45.155.204.190  content-management-files.canva.com
+45.155.204.190  static.canva.com
+45.155.204.190  www.canva.com
+
+# --- Chess ---
+45.155.204.190  assets-configurator.chess.com
+45.155.204.190  chess.com
+45.155.204.190  www.chess.com
+
+# --- FMHY ---
+45.155.204.190  a-lemmy.fmhy.net
+45.155.204.190  api.fmhy.net
+45.155.204.190  cat.fmhy.net
+45.155.204.190  dynmap.fmhy.net
+45.155.204.190  fmhy.lol
+45.155.204.190  fmhy.net
+45.155.204.190  guides.fmhy.lol
+45.155.204.190  i.fmhy.net
+45.155.204.190  lemmy.fmhy.net
+45.155.204.190  m-lemmy.fmhy.net
+45.155.204.190  old-lemmy.fmhy.net
+45.155.204.190  old.fmhy.net
+45.155.204.190  old.lemmy.fmhy.net
+45.155.204.190  op.fmhy.net
+45.155.204.190  p-lemmy.fmhy.net
+45.155.204.190  paste.fmhy.net
+45.155.204.190  pastes.fmhy.net
+45.155.204.190  redlib.fmhy.net
+45.155.204.190  searx.fmhy.net
+45.155.204.190  stats.fmhy.net
+45.155.204.190  status.fmhy.net
+45.155.204.190  sub.whoogle.fmhy.net
+45.155.204.190  ui.fmhy.net
+45.155.204.190  whoogle.fmhy.net
+45.155.204.190  www.fmhy.lol
+45.155.204.190  www.fmhy.net
+
+# --- Patreon ---
+45.155.204.190  c10.patreonusercontent.com
+45.155.204.190  c13.patreon.com
+45.155.204.190  c5.patreon.com
+77.239.114.0    patreon.com
+45.155.204.190  www.patreon.com
+
+# --- Groq AI ---
+
+# --- Instagram & Meta ---
+157.240.245.174 b.i.instagram.com
+157.240.245.174 instagram.com
+157.240.245.174 www.instagram.com
+
+# --- Telegram Web & API ---
+
+# --- Notion ---
+45.155.204.190  calendar.notion.com
+45.155.204.190  calendar.notion.so
+45.155.204.190  notion.com
+77.239.114.0    notion.so
+45.155.204.190  www.notion.com
+45.155.204.190  www.notion.so
+
+# --- Strava ---
+45.155.204.190  blog.strava.com
+45.155.204.190  c.strava.com
+45.155.204.190  cdn-1.strava.com
+45.155.204.190  content-a.strava.com
+45.155.204.190  dev.strava.com
+45.155.204.190  graphql.strava.com
+45.155.204.190  metro.strava.com
+77.239.114.0    strava.com
+45.155.204.190  support.strava.com
+45.155.204.190  tiles.strava.com
+45.155.204.190  www.strava.com
+
+# --- SketchUp ---
+45.155.204.190  id.trimble.com
+45.155.204.190  sketchup.com
+45.155.204.190  sketchup.trimble.com
+45.155.204.190  www.sketchup.com
+
+# --- Tuta ---
+45.155.204.190  app.tuta.com
+45.155.204.190  pay.tuta.com
+45.155.204.190  tuta.com
+45.155.204.190  tutanota.com
+45.155.204.190  w10.api.tuta.com
+45.155.204.190  w11.api.tuta.com
+45.155.204.190  w12.api.tuta.com
+45.155.204.190  w13.api.tuta.com
+45.155.204.190  w14.api.tuta.com
+45.155.204.190  w15.api.tuta.com
+45.155.204.190  w16.api.tuta.com
+45.155.204.190  w9.api.tuta.com
+45.155.204.190  www.tuta.com
+
+# --- TeamViewer ---
+45.155.204.190  dl.teamviewer.com
+45.155.204.190  download.teamviewer.com
+
+# --- Oracle ---
+45.155.204.190  oracle.com
+45.155.204.190  www.oracle.com
+
+# --- WorkOS ---
+45.155.204.190  api.workos.com
+
+# --- Xerox ---
+45.155.204.190  www.xerox.com
+45.155.204.190  xerox.com
+
+# --- Other ---
+45.155.204.190  amd.com
+45.155.204.190  api-global.squareup.com
+45.155.204.190  api.cdnlibs.org
+77.239.114.0    api.imgur.com
+45.155.204.190  api.squareup.com
+45.155.204.190  app.reve.com
+77.239.114.0    builds.parsec.app
+45.155.204.190  controlplane.tailscale.com
+77.239.114.0    developer.nvidia.com
+77.239.114.0    dyson.com
+77.239.114.0    eu.posthog.com
+77.239.114.0    framer.com
+45.155.204.190  frontend-api-v3.pump.fun
+45.155.204.190  geolocation.onetrust.com
+77.239.114.0    guidedhacking.com
+45.155.204.190  guilded.gg
+45.155.204.190  images.pump.fun
+45.155.204.190  intel.com
+45.155.204.190  make.com
+77.239.114.0    manus.im
+45.155.204.190  api.manus.im
+45.155.204.190  meta.ai
+45.155.204.190  preview.reve.art
+77.239.114.0    pump.fun
+77.239.114.0    qwant.com
+45.155.204.190  static-assets-1.truthsocial.com
+45.155.204.190  swap-api.pump.fun
+45.155.204.190  tableau.com
+52.223.13.41    tracker.openbittorrent.com
+77.239.114.0    tria.ge
+45.155.204.190  truthsocial.com
+77.239.114.0    us.posthog.com
+77.239.114.0    web.archive.org
+45.155.204.190  www.amd.com
+45.155.204.190  www.dyson.com
+45.155.204.190  www.dyson.de
+103.27.157.38   www.dyson.fr
+45.155.204.190  www.dyson.se
+77.239.114.0    www.elgato.com
+45.155.204.190  www.guidedhacking.com
+45.155.204.190  www.guilded.gg
+77.239.114.0    www.intel.com
+103.27.157.38   www.intel.de
+45.155.204.190  www.make.com
+45.155.204.190  www.meta.ai
+45.155.204.190  www.qwant.com
+45.155.204.190  www.tableau.com

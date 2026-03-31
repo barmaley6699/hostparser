@@ -1,151 +1,198 @@
-# --- qwenai ---
+# --- QwenAI ---
 chat.qwen.ai
 qwen.ai
 
 # --- OpenAI ChatGPT ---
 cdn.auth0.com
 ab.chatgpt.com
-chatgpt.com
-operator.chatgpt.com
-sora.chatgpt.com
-webrtc.chatgpt.com
-cdn.oaistatic.com
-files.oaiusercontent.com
-#cdn.openai.com
 android.chat.openai.com
 api.openai.com
+arena.openai.com
 auth.openai.com
 auth0.openai.com
+beta.api.openai.com
+beta.openai.com
+blog.openai.com
+cdn.oaistatic.com
+cdn.openai.com
 chat.openai.com
+chatgpt.com
+community.openai.com
+files.oaiusercontent.com
+help.openai.com
 ios.chat.openai.com
+labs.openai.com
+oaistatic.com
 openai.com
+operator.chatgpt.com
+platform.api.openai.com
 platform.openai.com
+sora.chatgpt.com
+sora.com
 tcr9i.chat.openai.com
 videos.openai.com
-sora.com
+webrtc.chatgpt.com
+www.chatgpt.com
+www.openai.com
 
 # --- Google Gemini AI ---
-cdn.auth0.com
-deepmind.google
-gemini.google
-generativeai.google
 ai.google.dev
+aisandbox-pa.googleapis.com
 aistudio.google.com
+aitestkitchen.withgoogle.com
 alkalicore-pa.clients6.google.com
 alkalimakersuite-pa.clients6.google.com
 apis.google.com
-bard.google.com
-clients4.google.com
-corp.google.com
-gemini.google.com
-google.com
-jules.google.com
-makersuite.google.com
-notebooklm.google.com
-people-pa.clients6.google.com
-signaler-pa.clients6.google.com
-waa-pa.clients6.google.com
-webchannel-alkalimakersuite-pa.clients6.google.com
-google-analytics.com
-aisandbox-pa.googleapis.com
-android.googleapis.com
 assistant-s3-pa.googleapis.com
-clientservices.googleapis.com
+bard.google.com
+csp.withgoogle.com
+daily-cloudcode-pa.googleapis.com
+deepmind.com
+deepmind.google
 developerprofiles-pa.googleapis.com
+fitbit-pa.googleapis.com
+fitbitvestibuleshim-pa.googleapis.com
 geller-pa.googleapis.com
+gemini.google
+gemini.google.com
+generativeai.google
 generativelanguage.googleapis.com
-proactivebackend-pa.googleapis.com
-robinfrontend-pa.googleapis.com
+google-analytics.com
 googleusercontent.com
 jules.google
+jules.google.com
 labs.google
+labs.google.com
+lookerstudio.google.com
+makersuite.google.com
+notebooklm-pa.googleapis.com
 notebooklm.google
+notebooklm.google.com
 o.pki.goog
-aitestkitchen.withgoogle.com
-csp.withgoogle.com
+opal.google
+opal.google.com
+opal.withgoogle.com
+people-pa.clients6.google.com
+proactivebackend-pa.googleapis.com
+robinfrontend-pa.googleapis.com
+signaler-pa.clients6.google.com
 stitch.withgoogle.com
+suggestqueries.google.com
+waa-pa.clients6.google.com
+webchannel-alkalimakersuite-pa.clients6.google.com
 withgoogle.com
 
 # --- Microsoft Copilot Xbox ---
-azwindows.ipv6.microsoft.com.akadns.net
-www.microsoft.com-c-3.edgekey.net.globalredir.akadns.net
-a1961.g2.akamai.net
-a1968.i6g1.akamai.net
-e13678.dscb.akamaiedge.net
+copilot.microsoft.com
+designer.microsoft.com
+designerapp.officeapps.live.com
+ecs.office.com
 edgeservices.bing.com
 rewards.bing.com
 sydney.bing.com
-www.microsoft.com-c-3.edgekey.net
-ipv6.msftconnecttest.com.edgesuite.net
-www.msftncsi.com.edgesuite.net
-copilot-proxy.githubusercontent.com
-auth.copilot.microsoft.com
-copilot.microsoft.com
-win1910.ipv6.microsoft.com
-ipv6.msftconnecttest.com
-www.msftconnecttest.com
-ncsi-geo.trafficmanager.net
-ncsiv6-geo.trafficmanager.net
 xboxdesignlab.xbox.com
-user.auth.xboxlive.com
 xgpuweb.gssv-play-prod.xboxlive.com
 xgpuwebf2p.gssv-play-prod.xboxlive.com
 xsts.auth.xboxlive.com
 
-# --- GitHub ---
+# --- GitHub Copilot ---
 api.github.com
 api.individual.githubcopilot.com
 githubcopilot.com
 proxy.individual.githubcopilot.com
+copilot-proxy.githubusercontent.com
 
 # --- Anthropic Claude ---
 a-api.anthropic.com
 a-cdn.anthropic.com
+a-cdn.claude.ai
+anthropic.com
 api.anthropic.com
+api.claude.ai
+api.console.anthropic.com
 auth.anthropic.com
+claude.ai
 console.anthropic.com
 s-cdn.anthropic.com
-a-cdn.claude.ai
-claude.ai
+statsig.anthropic.com
+status.anthropic.com
+support.anthropic.com
+www.anthropic.com
+www.claude.ai
 
 # --- X.ai Grok ---
-assets.grok.com
-grok.com
 accounts.x.ai
+api.x.ai
+asia-south1-livekit.grok.com
+assets.grok.com
+assets.x.ai
+console.x.ai
+data.x.ai
+deferred-chat.x.ai
+docs.x.ai
+eu-west-1.api.x.ai
 grok-v2.x.ai
+grok.com
+grok.x.ai
+imgen.x.ai
+jf.x.ai
+livekit.grok.com
+login.x.ai
+ssff.grok.com
+status.x.ai
+transcription.grok-v2.x.ai
+trust.x.ai
+typeahead.grok.com
+us-east-1.api.x.ai
+us-east-4-raw.api.x.ai
+us-south-1-pltr.api.x.ai
+us-west-1-raw.api.x.ai
+us-west-1.api.x.ai
+www.grok.com
+www.x.ai
 
 # --- ElevenLabs ---
 api.elevenlabs.io
 api.us.elevenlabs.io
+eleven-public-cdn.elevenlabs.io
 elevenlabs.io
-help.elevenlabs.io
 elevenreader.io
+help.elevenlabs.io
+payload.elevenlabs.io
+try.elevenlabs.io
+www.elevenlabs.io
 
-# --- Codeium ---
+# --- Codeium & Windsurf ---
 codeium.com
+codeiumdata.com
 inference.codeium.com
+inference.windsurf.com
+marketplace.windsurf.com
 server.codeium.com
 unleash.codeium.com
 web-backend.codeium.com
 windsurf-stable.codeium.com
 windsurf-telemetry.codeium.com
-codeiumdata.com
-inference.windsurf.com
-marketplace.windsurf.com
 windsurf.com
 
 # --- DeepL ---
 api-free.deepl.com
+api.deepl.com
 auth.deepl.com
 backend.deepl.com
 checkout.www.deepl.com
 clearance.deepl.com
+community-auth.deepl.com
 deepl.com
+developers.deepl.com
+dict-audio.deepl.com
 dict.deepl.com
 errortracking.deepl.com
-experimentation.deepl.com
 experimentation-grpc.deepl.com
+experimentation.deepl.com
 gtm.deepl.com
+home.deepl.com
+hs.deepl.com
 ita-free.app.deepl.com
 ita-free.www.deepl.com
 login-wall.deepl.com
@@ -153,29 +200,32 @@ oneshot-free.www.deepl.com
 ott.deepl.com
 s.deepl.com
 shield.deepl.com
+sl.deepl.com
+static.deepl.com
+support.deepl.com
 w.deepl.com
 write-free.www.deepl.com
 www.deepl.com
 www2.deepl.com
 
 # --- Trae.ai ---
+api-sg-central.trae.ai
+api.trae.ai
 api16-normal-alisg.mchost.guru
 trae-api-sg.mchost.guru
-api.trae.ai
-api-sg-central.trae.ai
 
 # --- Supercell Games ---
-game.brawlstarsgame.com
-game-assets.brawlstarsgame.com
-gamea.clashofclans.com
-game-assets.clashofclans.com
-game.clashroyaleapp.com
-game-assets.clashroyaleapp.com
-game.mocogame.com
-game.squadbustersgame.com
 accounts.supercell.com
 cdn.id.supercell.com
 clashofclans.inbox.supercell.com
+game-assets.brawlstarsgame.com
+game-assets.clashofclans.com
+game-assets.clashroyaleapp.com
+game.brawlstarsgame.com
+game.clashroyaleapp.com
+game.mocogame.com
+game.squadbustersgame.com
+gamea.clashofclans.com
 security.id.supercell.com
 store.supercell.com
 
@@ -197,11 +247,45 @@ store.on.epicgames.com
 tracking.epicgames.com
 
 # --- JetBrains ---
+academy.jetbrains.com
 account.jetbrains.com
 api.jetbrains.ai
+blog.jetbrains.com
+blogs.jetbrains.com
+cdn.jetbrains.com
+cai.jetbrains.com
+cloudconfig.jetbrains.com
+code-with-me.jetbrains.com
+codewithme-lobby.api.jetbrains.com
+codewithme-relay-europe-north1-1.api.jetbrains.com
+codewithme-relay-europe-north1-2.api.jetbrains.com
+confluence.jetbrains.com
+data.services.jetbrains.com
 datalore.jetbrains.com
-download.jetbrains.com
+download-cdn.jetbrains.com
+downloads.marketplace.jetbrains.com
+ea.jetbrains.com
+eap.jetbrains.com
+eu-1.jetbrains.space
+fleet-relay.api.jetbrains.com
+hub.jetbrains.com
+jetbrains.com
+jetbrains.space
+lservice.jetbrains.com
+marketplace.jetbrains.com
+myjetbrains.com
+oauth.account.jetbrains.com
+package-search.jetbrains.com
+pkg-cdn.jetbrains.space
 plugins.jetbrains.com
+resources.jetbrains.com
+sales.jetbrains.com
+support.jetbrains.com
+teamcity.jetbrains.com
+uploads.jetbrains.com
+www.jetbrains.com
+www.jetbrains.space
+youtrack.jetbrains.com
 
 # --- Linear.app ---
 client-api.linear.app
@@ -226,35 +310,44 @@ tidal.com
 
 # --- Spotify ---
 accounts.scdn.co
-encore.scdn.co
-www-growth.scdn.co
 accounts.spotify.com
 aet.spotify.com
-ap-gew1.spotify.com
-api.spotify.com
 api-partner.spotify.com
-appresolve.spotify.com
+api.spotify.com
+audio-fa.scdn.co
+canvaz.scdn.co
+encore.scdn.co
 gew1-dealer.spotify.com
 gew1-spclient.spotify.com
-login.app.spotify.com
+i.scdn.co
 login5.spotify.com
+open-exp.spotifycdn.com
 open.spotify.com
 spclient.wg.spotify.com
+spotifycdn.com
+spotifycdn.net
+www-growth.scdn.co
 www.spotify.com
-xpui.app.spotify.com
-open-exp.spotifycdn.com
 
 # --- Deezer ---
+account.deezer.com
+api.deezer.com
+auth.deezer.com
+connect.deezer.com
 deezer.com
-payment.deezer.com
-www.deezer.com
 dzcdn.net
+images.deezer.com
+media.deezer.com
+payment.deezer.com
+pipe.deezer.com
+preview.deezer.com
+stream.deezer.com
+support.deezer.com
+www.deezer.com
 
 # --- Fitbit Google Fit ---
 api.fitbit.com
 fitbit.google.com
-fitbit-pa.googleapis.com
-fitbitvestibuleshim-pa.googleapis.com
 
 # --- 4pda ---
 4pda.to
@@ -269,15 +362,15 @@ cs7f6c.4pda.ws
 upsx.weather.com
 weather.com
 
-# --- Weather ---
+# --- Weather Underground ---
+w-x.co
 wund.com
 wunderground.com
-w-x.co
 wxug.com
 
 # --- Twitch ---
-usher.ttvnw.net
 gql.twitch.tv
+usher.ttvnw.net
 
 # --- TikTok ---
 onelink.me
@@ -289,14 +382,15 @@ tiktokv.com
 tiktokv.eu
 tiktokw.eu
 ttwstatic.com
+www.tiktok.com
 
-# --- Badoo   
+# --- Badoo ---
 badoo.app
 badoo.com
-consent.badoo.com
-www.badoo.com
 badoocdn.com
+consent.badoo.com
 eu1.ecdn2.badoocdn.com
+www.badoo.com
 
 # --- Broadcom ---
 access.broadcom.com
@@ -326,13 +420,13 @@ guides.fmhy.lol
 i.fmhy.net
 lemmy.fmhy.net
 m-lemmy.fmhy.net
+old-lemmy.fmhy.net
 old.fmhy.net
 old.lemmy.fmhy.net
-old-lemmy.fmhy.net
 op.fmhy.net
+p-lemmy.fmhy.net
 paste.fmhy.net
 pastes.fmhy.net
-p-lemmy.fmhy.net
 redlib.fmhy.net
 searx.fmhy.net
 stats.fmhy.net
@@ -344,134 +438,180 @@ www.fmhy.lol
 www.fmhy.net
 
 # --- Patreon ---
+c10.patreonusercontent.com
 c13.patreon.com
 c5.patreon.com
 patreon.com
 www.patreon.com
-c10.patreonusercontent.com
+
+# --- Groq AI ---
+api.groq.com
+auth.groq.com
+console.groq.com
+groq.com
+static.groq.com
+www.groq.com
+
+# --- Instagram & Meta ---
+api.instagram.com
+b.i.instagram.com
+cdninstagram.com
+fb.com
+facebook.com
+facebook.net
+i.instagram.com
+instagram.com
+scontent.cdninstagram.com
+www.instagram.com
+
+# --- Telegram Web & API ---
+api.telegram.org
+aurora-1.web.telegram.org
+aurora.web.telegram.org
+cdn-telegram.org
+comments.app
+flora-1.web.telegram.org
+flora.web.telegram.org
+kws1-1.web.telegram.org
+kws1.web.telegram.org
+kws2-1.web.telegram.org
+kws2.web.telegram.org
+kws4-1.web.telegram.org
+kws4.web.telegram.org
+kws5-1.web.telegram.org
+kws5.web.telegram.org
+pluto-1.web.telegram.org
+pluto.web.telegram.org
+t.me
+td.telegram.org
+telegram.dog
+telegram.me
+telegram.org
+telegram.space
+telesco.pe
+tg.dev
+venus-1.web.telegram.org
+venus.web.telegram.org
+vesta-1.web.telegram.org
+vesta.web.telegram.org
+web.telegram.org
+zws1-1.web.telegram.org
+zws1.web.telegram.org
+zws2-1.web.telegram.org
+zws2.web.telegram.org
+zws4-1.web.telegram.org
+zws4.web.telegram.org
+zws5-1.web.telegram.org
+zws5.web.telegram.org
+
+# --- Notion ---
+calendar.notion.com
+calendar.notion.so
+notion.com
+notion.so
+www.notion.com
+www.notion.so
+
+# --- Strava ---
+blog.strava.com
+c.strava.com
+cdn-1.strava.com
+content-a.strava.com
+dev.strava.com
+graphql.strava.com
+metro.strava.com
+strava.com
+support.strava.com
+tiles.strava.com
+www.strava.com
+
+# --- SketchUp ---
+id.trimble.com
+sketchup.com
+sketchup.trimble.com
+www.sketchup.com
+
+# --- Tuta ---
+app.tuta.com
+pay.tuta.com
+tuta.com
+tutanota.com
+w10.api.tuta.com
+w11.api.tuta.com
+w12.api.tuta.com
+w13.api.tuta.com
+w14.api.tuta.com
+w15.api.tuta.com
+w16.api.tuta.com
+w9.api.tuta.com
+www.tuta.com
+
+# --- TeamViewer ---
+dl.teamviewer.com
+download.teamviewer.com
+
+# --- Oracle ---
+oracle.com
+www.oracle.com
+
+# --- WorkOS ---
+api.workos.com
+
+# --- Xerox ---
+www.xerox.com
+xerox.com
 
 # --- Other ---
 amd.com
-www.amd.com
-web.archive.org
-accounts.autodesk.com
-www.autodesk.com
-ai-chat.bsg.brave.com
+api-global.squareup.com
 api.cdnlibs.org
+api.imgur.com
+api.squareup.com
+app.reve.com
+builds.parsec.app
+ai-chat.bsg.brave.com
+controlplane.tailscale.com
 cursor.com
-dds.dell.com
-dell.com
-i.dell.com
-nexus.dell.com
-www.dell.com
-afcs.dellcdn.com
+developer.nvidia.com
 dyson.com
+eu.posthog.com
+events.statsigapi.net
+fanart.tv
+framer.com
+frontend-api-v3.pump.fun
+geolocation.onetrust.com
+guidedhacking.com
+guilded.gg
+images.pump.fun
+intel.com
+make.com
+manus.im
+api.manus.im
+meta.ai
+preview.reve.art
+prodregistryv2.org
+pump.fun
+qwant.com
+squareup.com
+static-assets-1.truthsocial.com
+swap-api.pump.fun
+tableau.com
+tracker.openbittorrent.com
+tria.ge
+truthsocial.com
+us.posthog.com
+web.archive.org
+www.amd.com
 www.dyson.com
 www.dyson.de
 www.dyson.fr
 www.dyson.se
 www.elgato.com
-fanart.tv
-framer.com
-guidedhacking.com
 www.guidedhacking.com
-guilded.gg
 www.guilded.gg
-api.imgur.com
-intel.com
 www.intel.com
 www.intel.de
-make.com
 www.make.com
-api.manus.im
-manus.im
-meta.ai
 www.meta.ai
-calendar.notion.so
-www.notion.so
-developer.nvidia.com
-geolocation.onetrust.com
-tracker.openbittorrent.com
-builds.parsec.app
-eu.posthog.com
-us.posthog.com
-prodregistryv2.org
-frontend-api-v3.pump.fun
-images.pump.fun
-pump.fun
-swap-api.pump.fun
-qwant.com
 www.qwant.com
-app.reve.com
-preview.reve.art
-api.squareup.com
-api-global.squareup.com
-squareup.com
-events.statsigapi.net
-tableau.com
 www.tableau.com
-controlplane.tailscale.com
-www.tiktok.com
-tria.ge
-static-assets-1.truthsocial.com
-truthsocial.com
-
-# --- Groq AI (LPU Inference) ---
-groq.com
-www.groq.com
-console.groq.com
-api.groq.com
-auth.groq.com
-static.groq.com
-
-# --- Instagram & Meta ---
-instagram.com
-www.instagram.com
-api.instagram.com
-i.instagram.com
-cdninstagram.com
-scontent.cdninstagram.com
-fb.com
-facebook.net
-facebook.com
-
-# --- Telegram Web & API ---
-telegram.me
-telegram.dog
-telegram.space
-telesco.pe
-tg.dev
-telegram.org
-t.me
-api.telegram.org
-td.telegram.org
-web.telegram.org
-pluto.web.telegram.org
-pluto-1.web.telegram.org
-flora.web.telegram.org
-flora-1.web.telegram.org
-venus.web.telegram.org
-venus-1.web.telegram.org
-vesta.web.telegram.org
-vesta-1.web.telegram.org
-aurora.web.telegram.org
-aurora-1.web.telegram.org
-kws1.web.telegram.org
-kws1-1.web.telegram.org
-kws2.web.telegram.org
-kws2-1.web.telegram.org
-kws4.web.telegram.org
-kws4-1.web.telegram.org
-kws5.web.telegram.org
-kws5-1.web.telegram.org
-zws1.web.telegram.org
-zws1-1.web.telegram.org
-zws2.web.telegram.org
-zws2-1.web.telegram.org
-zws4.web.telegram.org
-zws4-1.web.telegram.org
-zws5.web.telegram.org
-zws5-1.web.telegram.org
-telegram.org
-cdn-telegram.org
-comments.app
