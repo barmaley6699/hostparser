@@ -7,7 +7,7 @@ pause
 exit /b
 #>
 #================================================================
-# MULTI-DNS Hosts Parser v7 (Structure Restored + Safe Output)
+# MULTI-DNS Hosts Parser 
 #================================================================
 $scriptStart = Get-Date
 $currentDir = $PSScriptRoot
@@ -98,7 +98,7 @@ function Get-InheritedIp([string]$domain, [hashtable]$map) {
 # МЕНЮ
 #================================================================
 Write-Host " "; Write-Host "  ╔════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║     MULTI-DNS Hosts Parser v7              ║" -ForegroundColor Cyan
+Write-Host "  ║     MULTI-DNS Hosts Parser                 ║" -ForegroundColor Cyan
 Write-Host "  ╚════════════════════════════════════════════╝" -ForegroundColor Cyan; Write-Host " "
 
 $addAdobe = Get-Answer "1. Блокировка Adobe?"
