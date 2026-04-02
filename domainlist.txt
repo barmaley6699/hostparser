@@ -34,7 +34,6 @@ videos.openai.com
 webrtc.chatgpt.com
 www.chatgpt.com
 www.openai.com
-
 # --- Google Gemini AI ---
 ai.google.dev
 aisandbox-pa.googleapis.com
@@ -81,7 +80,6 @@ suggestqueries.google.com
 waa-pa.clients6.google.com
 webchannel-alkalimakersuite-pa.clients6.google.com
 withgoogle.com
-
 # --- Microsoft Copilot Xbox ---
 copilot.microsoft.com
 designer.microsoft.com
@@ -94,14 +92,12 @@ xboxdesignlab.xbox.com
 xgpuweb.gssv-play-prod.xboxlive.com
 xgpuwebf2p.gssv-play-prod.xboxlive.com
 xsts.auth.xboxlive.com
-
 # --- GitHub Copilot ---
 api.github.com
 api.individual.githubcopilot.com
 githubcopilot.com
 proxy.individual.githubcopilot.com
 copilot-proxy.githubusercontent.com
-
 # --- Anthropic Claude ---
 a-api.anthropic.com
 a-cdn.anthropic.com
@@ -119,7 +115,6 @@ status.anthropic.com
 support.anthropic.com
 www.anthropic.com
 www.claude.ai
-
 # --- X.ai Grok ---
 accounts.x.ai
 api.x.ai
@@ -150,7 +145,6 @@ us-west-1-raw.api.x.ai
 us-west-1.api.x.ai
 www.grok.com
 www.x.ai
-
 # --- ElevenLabs ---
 api.elevenlabs.io
 api.us.elevenlabs.io
@@ -161,7 +155,6 @@ help.elevenlabs.io
 payload.elevenlabs.io
 try.elevenlabs.io
 www.elevenlabs.io
-
 # --- Codeium & Windsurf ---
 codeium.com
 codeiumdata.com
@@ -174,7 +167,6 @@ web-backend.codeium.com
 windsurf-stable.codeium.com
 windsurf-telemetry.codeium.com
 windsurf.com
-
 # --- DeepL ---
 api-free.deepl.com
 api.deepl.com
@@ -207,13 +199,11 @@ w.deepl.com
 write-free.www.deepl.com
 www.deepl.com
 www2.deepl.com
-
 # --- Trae.ai ---
 api-sg-central.trae.ai
 api.trae.ai
 api16-normal-alisg.mchost.guru
 trae-api-sg.mchost.guru
-
 # --- Supercell Games ---
 accounts.supercell.com
 cdn.id.supercell.com
@@ -228,7 +218,6 @@ game.squadbustersgame.com
 gamea.clashofclans.com
 security.id.supercell.com
 store.supercell.com
-
 # --- Epic Games ---
 ak.epicgames.com
 api.epicgames.dev
@@ -245,7 +234,6 @@ perf.store.on.epicgames.com
 store.epicgames.com
 store.on.epicgames.com
 tracking.epicgames.com
-
 # --- JetBrains ---
 academy.jetbrains.com
 account.jetbrains.com
@@ -286,7 +274,6 @@ uploads.jetbrains.com
 www.jetbrains.com
 www.jetbrains.space
 youtrack.jetbrains.com
-
 # --- Linear.app ---
 client-api.linear.app
 constellation.linear.app
@@ -295,7 +282,6 @@ public.linear.app
 s.linear.app
 static.linear.app
 uploads.linear.app
-
 # --- Tidal ---
 api.tidal.com
 auth.tidal.com
@@ -307,7 +293,6 @@ listen.tidal.com
 login.tidal.com
 resources.tidal.com
 tidal.com
-
 # --- Spotify ---
 accounts.scdn.co
 accounts.spotify.com
@@ -328,7 +313,6 @@ spotifycdn.com
 spotifycdn.net
 www-growth.scdn.co
 www.spotify.com
-
 # --- Deezer ---
 account.deezer.com
 api.deezer.com
@@ -344,11 +328,9 @@ preview.deezer.com
 stream.deezer.com
 support.deezer.com
 www.deezer.com
-
 # --- Fitbit Google Fit ---
 api.fitbit.com
 fitbit.google.com
-
 # --- 4pda ---
 4pda.to
 4pda.ws
@@ -357,21 +339,17 @@ cs2c9f.4pda.ws
 cs3b2e.4pda.ws
 cs4a0d.4pda.ws
 cs7f6c.4pda.ws
-
 # --- Weather.com ---
 upsx.weather.com
 weather.com
-
 # --- Weather Underground ---
 w-x.co
 wund.com
 wunderground.com
 wxug.com
-
 # --- Twitch ---
 gql.twitch.tv
 usher.ttvnw.net
-
 # --- TikTok ---
 onelink.me
 snssdk1233.onelink.me
@@ -383,7 +361,6 @@ tiktokv.eu
 tiktokw.eu
 ttwstatic.com
 www.tiktok.com
-
 # --- Badoo ---
 badoo.app
 badoo.com
@@ -391,24 +368,20 @@ badoocdn.com
 consent.badoo.com
 eu1.ecdn2.badoocdn.com
 www.badoo.com
-
 # --- Broadcom ---
 access.broadcom.com
 knowledge.broadcom.com
 profile.broadcom.com
 support.broadcom.com
-
 # --- Canva ---
 canva.com
 content-management-files.canva.com
 static.canva.com
 www.canva.com
-
 # --- Chess ---
 assets-configurator.chess.com
 chess.com
 www.chess.com
-
 # --- FMHY ---
 a-lemmy.fmhy.net
 api.fmhy.net
@@ -436,14 +409,12 @@ ui.fmhy.net
 whoogle.fmhy.net
 www.fmhy.lol
 www.fmhy.net
-
 # --- Patreon ---
 c10.patreonusercontent.com
 c13.patreon.com
 c5.patreon.com
 patreon.com
 www.patreon.com
-
 # --- Groq AI ---
 api.groq.com
 auth.groq.com
@@ -451,7 +422,6 @@ console.groq.com
 groq.com
 static.groq.com
 www.groq.com
-
 # --- Instagram & Meta ---
 api.instagram.com
 b.i.instagram.com
@@ -463,7 +433,6 @@ i.instagram.com
 instagram.com
 scontent.cdninstagram.com
 www.instagram.com
-
 # --- Telegram Web & API ---
 api.telegram.org
 aurora-1.web.telegram.org
@@ -503,7 +472,6 @@ zws4-1.web.telegram.org
 zws4.web.telegram.org
 zws5-1.web.telegram.org
 zws5.web.telegram.org
-
 # --- Notion ---
 calendar.notion.com
 calendar.notion.so
@@ -511,7 +479,6 @@ notion.com
 notion.so
 www.notion.com
 www.notion.so
-
 # --- Strava ---
 blog.strava.com
 c.strava.com
@@ -524,13 +491,11 @@ strava.com
 support.strava.com
 tiles.strava.com
 www.strava.com
-
 # --- SketchUp ---
 id.trimble.com
 sketchup.com
 sketchup.trimble.com
 www.sketchup.com
-
 # --- Tuta ---
 app.tuta.com
 pay.tuta.com
@@ -545,22 +510,17 @@ w15.api.tuta.com
 w16.api.tuta.com
 w9.api.tuta.com
 www.tuta.com
-
 # --- TeamViewer ---
 dl.teamviewer.com
 download.teamviewer.com
-
 # --- Oracle ---
 oracle.com
 www.oracle.com
-
 # --- WorkOS ---
 api.workos.com
-
 # --- Xerox ---
 www.xerox.com
 xerox.com
-
 # --- Other ---
 amd.com
 api-global.squareup.com

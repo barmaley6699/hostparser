@@ -6,29 +6,19 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command "iex ([System.IO.File]::R
 pause
 exit /b
 #>
-
-# ================================================================
-#  MULTI-DNS Hosts Parser — DoH Edition
-# ================================================================
-
+#================================================================
+# MULTI-DNS Hosts Parser v7 (Structure Restored + Safe Output)
+#================================================================
 $scriptStart = Get-Date
-
-# ================================================================
-# КОНФИГУРАЦИЯ
-# ================================================================
 $currentDir = $PSScriptRoot
-if (-not $currentDir) {
-    try { $currentDir = Split-Path -Parent $MyInvocation.MyCommand.Definition -EA SilentlyContinue } catch {}
-}
+if (-not $currentDir) { try { $currentDir = Split-Path -Parent $MyInvocation.MyCommand.Definition -EA SilentlyContinue } catch {} }
 if (-not $currentDir) { $currentDir = (Get-Location).Path }
 
 $localFile  = Join-Path $currentDir "domainlist.txt"
 $coreFile   = Join-Path $currentDir "core_domains.txt"
 $mergedFile = Join-Path $currentDir "hosts_merged.txt"
+$userAgent  = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 
-# DoH пул. Каждый сервер опрашивается через DNS-over-HTTPS.
-# Fallback на nslookup если DoH недоступен.
-# DNS серверы для резолвинга
 $dnsServers = [ordered]@{
     'GeoHide'   = '194.190.11.1'
     'Comss'     = '83.220.169.155'
@@ -38,24 +28,6 @@ $dnsServers = [ordered]@{
     'Astra'     = '108.165.164.201'
 }
 
-# Единый список proxy IP — все IP которые bypass DNS серверы используют для проксирования.
-# Включает:
-#   - IPv4 самих DNS серверов (они могут сами выступать proxy)
-#   - IP из статических hosts файлов (собираются в шаге 1)
-# Если nslookup вернул IP из этого списка — домен проксируется, IP рабочий.
-$proxyIpSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-# Заранее добавляем IPv4 самих DNS серверов
-@('194.190.11.1','83.220.169.155','111.88.96.50','111.88.96.51',
-  '212.109.195.93','108.165.164.201',
-  '45.155.204.190','95.182.120.241','31.25.239.132',
-  '77.239.114.0','77.239.113.0','103.27.157.38',
-  '108.165.164.224','31.25.239.132') | ForEach-Object { [void]$proxyIpSet.Add($_) }
-
-# Кэш пинга
-$pingCache = @{}
-
-# Статические hosts — приоритетный источник.
-# Первый файл имеет наивысший приоритет (не перезаписывается).
 $staticHostsUrls = @(
     "https://raw.githubusercontent.com/ASTRACAT2022/host-DNS/refs/heads/main/base_hosts.txt",
     "https://raw.githubusercontent.com/Internet-Helper/GeoHideDNS/refs/heads/main/hosts/hosts",
@@ -64,437 +36,269 @@ $staticHostsUrls = @(
     "https://raw.githubusercontent.com/HolyLightRU/HolyZapret/refs/heads/main/lists/hosts-list.txt"
 )
 
-$adobeUrl = "https://a.dove.isdumb.one/list.txt"
-
 $finalCheckDomains = if (Test-Path $coreFile) {
-    @(Get-Content $coreFile -Encoding UTF8 |
-      Where-Object { $_.Trim() -and !$_.StartsWith('#') } |
-      ForEach-Object { $_.Trim() })
+    @(Get-Content $coreFile -Encoding UTF8 | Where-Object { $_.Trim() -and !$_.StartsWith('#') } | ForEach-Object { $_.Trim() })
 } else {
-    @("openai.com","chatgpt.com","google.com","anthropic.com","claude.ai",
-      "telegram.org","instagram.com","facebook.com","tiktok.com")
+    @( "openai.com", "chatgpt.com", "anthropic.com", "claude.ai", "telegram.org", "instagram.com", "tiktok.com")
 }
 
-# ================================================================
+#================================================================
 # ХРАНИЛИЩА
-# ================================================================
-$finalHosts       = New-Object System.Collections.Generic.List[string]
-$finalHostsMap    = @{}
-$notFoundDomains  = New-Object System.Collections.Generic.List[string]
-$discoveredHosts  = New-Object System.Collections.Generic.List[string]
-$seenDomains      = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
-$deepScannedRoots = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
-$staticIpMap      = @{}   # domain -> ip из статических hosts файлов
-$userAgent        = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+#================================================================
+$staticIpMap  = @{}   
+$processedDomains = @{}
+$proxyIpSet = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
+@('194.190.11.1','83.220.169.155','111.88.96.50','111.88.96.51',
+  '212.109.195.93','108.165.164.201','108.165.164.224',
+  '45.155.204.190','95.182.120.241','31.25.239.132','103.27.157.38') |
+    ForEach-Object { [void]$proxyIpSet.Add($_) }
 
-# ================================================================
+#================================================================
 # ФУНКЦИИ
-# ================================================================
-
+#================================================================
 function Format-Duration([int]$sec) {
-    if ($sec -lt 60)  { return "${sec}с" }
-    $m = [int]($sec / 60); $s = $sec % 60
-    if ($m -lt 60)    { return "${m}м ${s}с" }
-    $h = [int]($m / 60); $m2 = $m % 60
-    return "${h}ч ${m2}м"
+    if ($sec -lt 60) { return "${sec}с" }
+    $m = [int]($sec/60); $s = $sec%60
+    if ($m -lt 60) { return "${m}м ${s}с" }
+    return "$([int]($m/60))ч $($m%60)м"
 }
 
-function Get-Answer($msg) {
-    Write-Host "  " -NoNewline
-    $ans = Read-Host "$msg [Y/N]"
-    return $ans -match "[yYдД]"
+function Get-Answer($msg) { $ans = Read-Host "  $msg [Y/N]"; return $ans -match "[yYдД]" }
+
+# HTTP проверка (0 = недоступно, >0 = код ответа)
+function Test-SiteViaIp([string]$site, [string]$ip, [int]$timeout = 8) {
+    $code = (& curl.exe -s -o NUL -w "%{http_code}" -L -k --max-time $timeout `
+             --resolve "${site}:443:${ip}" --resolve "${site}:80:${ip}" `
+             "https://${site}" 2>$null) -replace '\s', ''
+    $intCode = 0
+    if ([int]::TryParse($code, [ref]$intCode)) { return $intCode }
+    return 0
 }
 
-
-# DNS резолвинг через nslookup
 function Resolve-ViaNslookup([string]$domain, [string]$dnsIp) {
-    $raw = & nslookup $domain $dnsIp 2>$null | Out-String
-    $sections = $raw -split "`r?`n`r?`n"
-    $answer   = if ($sections.Count -gt 1) { $sections[1..($sections.Count-1)] -join "`n" } else { $raw }
-    return @([regex]::Matches($answer, '(\d{1,3}(?:\.\d{1,3}){3})') |
-             ForEach-Object { [string]$_.Groups[1].Value } |
-             Where-Object   { $_ -notmatch '^(0\.|127\.|169\.254\.)' })
+    try {
+        $raw = & nslookup $domain $dnsIp 2>$null | Out-String
+        return @([regex]::Matches($raw, '\b(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\b') | 
+                 ForEach-Object { $_.Groups[1].Value } |
+                 Where-Object { $_ -notmatch '^(0\.|127\.|169.254\.)' } | Select-Object -Unique)
+    } catch { return @() }
 }
 
-function Resolve-DomainEntry([string]$target) {
-    Write-Host "  $target" -ForegroundColor White
-
-    # Приоритет 1: статические hosts
-    if ($staticIpMap.ContainsKey($target)) {
-        $staticIp = [string]$staticIpMap[$target]
-        Write-Host ("    [STATIC] {0}" -f $staticIp) -ForegroundColor Green
-        return "$($staticIp.PadRight(15)) $target"
+# Умное наследование IP от родителя
+function Get-InheritedIp([string]$domain, [hashtable]$map) {
+    $parts = $domain -split '\.'
+    for ($i = 1; $i -lt $parts.Count - 1; $i++) {
+        $parent = ($parts[$i..($parts.Count-1)] -join '.')
+        if ($map.ContainsKey($parent)) { return $map[$parent] }
     }
-
-    # Приоритет 2: резолвим через все DNS серверы
-    # Логика:
-    #   - Собираем все IP которые вернули серверы
-    #   - Если IP есть в $proxyIpSet — это bypass IP (сервер проксирует домен)
-    #   - Среди proxy IP выбираем с лучшим пингом
-    #   - Если proxy IP нет — мажоритарное голосование среди всех
-
-    $allIps     = [System.Collections.Generic.Dictionary[string,int]]::new([System.StringComparer]::Ordinal)
-    $proxyFound = [System.Collections.Generic.List[string]]::new()
-    $dnsLog     = [ordered]@{}
-
-    foreach ($name in $dnsServers.Keys) {
-        $dnsIp = $dnsServers[$name]
-        $ips   = Resolve-ViaNslookup $target $dnsIp
-        $dnsLog[$name] = $ips
-
-        if ($ips.Count -gt 0) {
-            $primary = [string]$ips[0]
-            if ($allIps.ContainsKey($primary)) { $allIps[$primary]++ }
-            else { $allIps[$primary] = 1 }
-
-            if ($proxyIpSet.Contains($primary) -and -not $proxyFound.Contains($primary)) {
-                $proxyFound.Add($primary)
-            }
-        }
-    }
-
-    # Вывод
-    foreach ($name in $dnsLog.Keys) {
-        $ips     = $dnsLog[$name]
-        $str     = if ($ips.Count -gt 0) { $ips -join ', ' } else { '—' }
-        $primary = if ($ips.Count -gt 0) { [string]$ips[0] } else { '' }
-        $isProxy = $proxyIpSet.Contains($primary)
-        $color   = if ($isProxy) { 'Green' } else { 'DarkGray' }
-        $tag     = if ($isProxy) { '[PROXY]' } else { '[dns]  ' }
-        Write-Host ("    [{0,-9}]{1} {2}" -f $name, $tag, $str) -ForegroundColor $color
-    }
-
-    if ($allIps.Count -eq 0) {
-        Write-Host "    => NO IP" -ForegroundColor Red
-        return $null
-    }
-
-    $chosenIp = $null
-
-    if ($proxyFound.Count -gt 0) {
-        # Есть bypass IP — выбираем лучший по пингу
-        $bestIp = [string]$proxyFound[0]
-        $bestMs = 99999
-
-        if ($proxyFound.Count -gt 1) {
-            foreach ($pip in $proxyFound) {
-                if ($pingCache.ContainsKey($pip)) {
-                    $ms = $pingCache[$pip]
-                } else {
-                    $p  = Test-Connection $pip -Count 1 -EA SilentlyContinue
-                    $ms = if ($p) { [int]$p.ResponseTime } else { 9999 }
-                    $pingCache[$pip] = $ms
-                }
-                Write-Host ("    [PING] {0,-17} {1}ms" -f $pip, $ms) -ForegroundColor DarkGray
-                if ($ms -lt $bestMs) { $bestMs = $ms; $bestIp = [string]$pip }
-            }
-            Write-Host ("    => PROXY (fastest): {0} ({1}ms)" -f $bestIp, $bestMs) -ForegroundColor Magenta
-        } else {
-            Write-Host ("    => PROXY: {0}" -f $bestIp) -ForegroundColor Magenta
-        }
-        $chosenIp = $bestIp
-
-    } else {
-        # Нет proxy IP — мажоритарное голосование
-        $maxV    = ($allIps.Values | Measure-Object -Maximum).Maximum
-        $topList = New-Object System.Collections.Generic.List[string]
-        foreach ($k in @($allIps.Keys)) {
-            if ($allIps[$k] -eq $maxV) { $topList.Add([string]$k) }
-        }
-
-        if ($topList.Count -eq 1) {
-            $chosenIp = [string]$topList[0]
-            Write-Host ("    => VOTE [{0}/{1}]: {2}" -f $maxV, $dnsServers.Count, $chosenIp) -ForegroundColor Cyan
-        } else {
-            $bestMs = 99999
-            foreach ($ip in $topList) {
-                if ($pingCache.ContainsKey($ip)) { $ms = $pingCache[$ip] }
-                else {
-                    $p  = Test-Connection $ip -Count 1 -EA SilentlyContinue
-                    $ms = if ($p) { [int]$p.ResponseTime } else { 9999 }
-                    $pingCache[$ip] = $ms
-                }
-                Write-Host ("    [PING] {0,-17} {1}ms" -f $ip, $ms) -ForegroundColor DarkGray
-                if ($ms -lt $bestMs) { $bestMs = $ms; $chosenIp = [string]$ip }
-            }
-            Write-Host ("    => TIE, fastest: {0} ({1}ms)" -f $chosenIp, $bestMs) -ForegroundColor Cyan
-        }
-    }
-
-    return "$($chosenIp.PadRight(15)) $target"
-}
-function Get-ExternalSubdomains([string]$rootDomain) {
-    Write-Host "    [crt.sh] $rootDomain ..." -NoNewline -ForegroundColor DarkCyan
-    $url = "https://crt.sh/?q=%25.$rootDomain&output=json"
-    for ($attempt = 1; $attempt -le 3; $attempt++) {
-        try {
-            $resp = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 45 -EA Stop
-            $data = $resp.Content | ConvertFrom-Json -EA Stop
-            if ($data) {
-                $subs = $data |
-                    ForEach-Object { ($_.name_value -split "`n") } |
-                    Where-Object   { $_ -like "*.$rootDomain" -and $_ -notmatch '\*' } |
-                    ForEach-Object { $_.ToLower().Trim() } |
-                    Select-Object -Unique
-                Write-Host " $($subs.Count) субдоменов" -ForegroundColor DarkGreen
-                return $subs
-            }
-        } catch {
-            if ($attempt -lt 3) {
-                Write-Host " попытка $attempt/3, ждём 5с..." -ForegroundColor DarkYellow
-                Start-Sleep 5
-                Write-Host "    [crt.sh] $rootDomain ..." -NoNewline -ForegroundColor DarkCyan
-            } else { Write-Host " недоступен" -ForegroundColor Red }
-        }
-    }
-    return @()
+    return $null
 }
 
-# ================================================================
+#================================================================
 # МЕНЮ
-# ================================================================
-Write-Host ""
-Write-Host "  ╔════════════════════════════════════════════╗" -ForegroundColor Cyan
-Write-Host "  ║     MULTI-DNS Hosts Parser  [DoH]         ║" -ForegroundColor Cyan
-Write-Host "  ╚════════════════════════════════════════════╝" -ForegroundColor Cyan
-Write-Host ""
+#================================================================
+Write-Host " "; Write-Host "  ╔════════════════════════════════════════════╗" -ForegroundColor Cyan
+Write-Host "  ║     MULTI-DNS Hosts Parser v7              ║" -ForegroundColor Cyan
+Write-Host "  ╚════════════════════════════════════════════╝" -ForegroundColor Cyan; Write-Host " "
+
 $addAdobe = Get-Answer "1. Блокировка Adobe?"
-$deepScan = Get-Answer "2. Deep Scan новых субдоменов (crt.sh)?"
+$deepScan = Get-Answer "2. Deep Scan (crt.sh) - (Медленно)"
 $openPath = Get-Answer "3. Открыть папку после завершения?"
-Write-Host ""
+
+if ($deepScan) { Write-Host "  [!] Deep scan включен." -ForegroundColor Yellow }
+Write-Host " "
 
 if (Test-Path $localFile) {
-    $domainLines = @(Get-Content $localFile -Encoding UTF8 |
-                    Where-Object { $_.Trim() -and !$_.Trim().StartsWith('#') })
-    $domainCount = $domainLines.Count
-    $etaSec = $domainCount * 3   # ~3с: статика мгновенно, DoH быстрее nslookup
-    if ($deepScan) {
-        $rootCount = @($domainLines | Where-Object { ($_.Trim() -split '\.').Count -eq 2 }).Count
-        $etaSec += $rootCount * 45
-    }
-    Write-Host ("  DNS серверов     : {0}" -f $dnsServers.Count) -ForegroundColor Cyan
-    Write-Host ("  Доменов в списке : {0}" -f $domainCount) -ForegroundColor Cyan
-    Write-Host ("  Ожидаемое время  : ~{0}" -f (Format-Duration $etaSec)) -ForegroundColor Cyan
-    Write-Host ""
+    $dc = @(Get-Content $localFile -Encoding UTF8 | Where-Object { $_.Trim() -and !$_.Trim().StartsWith('#') }).Count
+    Write-Host ("  DNS серверов : {0} | Доменов : {1}" -f $dnsServers.Count, $dc) -ForegroundColor Cyan; Write-Host ""
 }
 
-# ================================================================
-# ШАПКА ФАЙЛА
-# ================================================================
-$finalHosts.Add("# ================================================================")
-$finalHosts.Add("# Generated : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
-$finalHosts.Add("# DoH pool  : $($dnsPool.Keys -join ', ')")
-$finalHosts.Add("# ================================================================")
-
-# ================================================================
-# ШАГ 1: СТАТИЧЕСКИЕ HOSTS (приоритетный источник)
-# ================================================================
-Write-Host "[1/4] Загружаем статические hosts файлы..." -ForegroundColor Cyan
-$staticCount = 0
+#================================================================
+# ШАГ 1: ЗАГРУЗКА СТАТИКИ
+#================================================================
+Write-Host "[1/4] Загрузка статических баз..." -ForegroundColor Cyan
 foreach ($url in $staticHostsUrls) {
-    $name = ($url -split '/')[-1]
-    Write-Host ("  {0,-50}" -f $name) -NoNewline -ForegroundColor DarkGray
     try {
-        $resp = Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 20 -EA Stop
-        # Обрабатываем как байты если Content-Type не text (напр. application/octet-stream)
-        $rawContent = if ($resp.Content -is [byte[]]) {
-            [System.Text.Encoding]::UTF8.GetString($resp.Content)
-        } else {
-            [string]$resp.Content
-        }
-        $content = $rawContent -split "`n"
-        $count = 0
-        foreach ($line in $content) {
-            $clean = $line.Split('#')[0].Trim()
-            if ($clean -match '^(\d{1,3}(?:\.\d{1,3}){3})\s+([a-z0-9][a-z0-9._-]*\.[a-z]{2,})$') {
-                $ip  = [string]$Matches[1]
-                $dom = [string]$Matches[2].ToLower()
-                if ($ip -notmatch '^(0\.|127\.|169\.254\.)' -and -not $staticIpMap.ContainsKey($dom)) {
-                    $staticIpMap[$dom] = $ip
-                    $count++
-                    $staticCount++
+        $raw = (Invoke-WebRequest -Uri $url -UseBasicParsing -TimeoutSec 15 -EA Stop).Content
+        foreach ($line in ($raw -split "`n")) {
+            if ($line -match '^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\s+([a-z0-9._-]+\.[a-z]{2,})$') {
+                $ip = $Matches[1]; $dom = $Matches[2].ToLower()
+                if ($ip -notmatch '^(0\.|127\.)') {
+                    if (-not $staticIpMap.ContainsKey($dom)) { $staticIpMap[$dom] = New-Object System.Collections.Generic.List[string] }
+                    if (-not $staticIpMap[$dom].Contains($ip)) {
+                        $staticIpMap[$dom].Add($ip)
+                        [void]$proxyIpSet.Add($ip)
+                    }
                 }
             }
         }
-        Write-Host "$count доменов" -ForegroundColor Green
-    } catch { Write-Host "ОШИБКА: $($_.Exception.Message)" -ForegroundColor Red }
+    } catch {}
 }
+Write-Host ("  Найдено IP в базах: {0}" -f $staticIpMap.Count) -ForegroundColor DarkGray; Write-Host ""
 
-# Добавляем все IP из статических hosts в proxyIpSet
-$addedToProxy = 0
-foreach ($ip in @($staticIpMap.Values)) {
-    if ([void]$proxyIpSet.Add([string]$ip)) { $addedToProxy++ }
-}
-Write-Host ("  Proxy IP пул обновлён: {0} уникальных IP" -f $proxyIpSet.Count) -ForegroundColor DarkGray
-Write-Host ""
+#================================================================
+# ШАГ 2: ОБРАБОТКА DOMAINLIST (Load Balance + Inheritance)
+#================================================================
+Write-Host "[2/4] Обработка domainlist.txt (Проверка + Балансировка)..." -ForegroundColor Cyan
+Write-Host "  Проверяем до 3 кандидатов, выбираем случайный." -ForegroundColor DarkGray; Write-Host ""
 
-# ================================================================
-# ШАГ 2: ADOBE BLOCKLIST
-# ================================================================
-if ($addAdobe) {
-    Write-Host "[2/4] Блоклист Adobe..." -ForegroundColor Cyan
-    Write-Host ("  {0,-50}" -f ($adobeUrl -split '/')[-1]) -NoNewline -ForegroundColor DarkGray
-    try {
-        $content = (Invoke-WebRequest -Uri $adobeUrl -UseBasicParsing -TimeoutSec 20 -EA Stop).Content -split "`n"
-        $added = 0
-        foreach ($line in $content) {
-            $clean = $line.Split('#')[0].Trim()
-            if ($clean -match '^(?:(?:0\.0\.0\.0|127\.0\.0\.1)\s+)?([a-z0-9][a-z0-9._-]*\.[a-z]{2,})$') {
-                $dom = $Matches[1].ToLower()
-                if ($seenDomains.Add($dom)) { $finalHosts.Add("0.0.0.0         $dom"); $added++ }
+if (Test-Path $localFile) {
+    $domains = Get-Content $localFile -Encoding UTF8 | Where-Object { $_.Trim() -and !($_.Trim().StartsWith('#')) }
+    
+    foreach ($rawDom in $domains) {
+        $dom = ($rawDom -replace '^https?://', '' -replace '[/?#].*$', '').ToLower().Trim()
+        if ([string]::IsNullOrEmpty($dom)) { continue }
+
+        $finalIp = $null
+        $source = ""
+
+        # 1. Статика (с балансировкой нагрузки)
+        if ($staticIpMap.ContainsKey($dom)) {
+            $candidates = @($staticIpMap[$dom] | Where-Object { $proxyIpSet.Contains($_) })
+            if ($candidates.Count -eq 0) { $candidates = @($staticIpMap[$dom]) }
+
+            $working = New-Object System.Collections.Generic.List[string]
+            $toTest = [Math]::Min($candidates.Count, 5)
+            for ($i = 0; $i -lt $toTest; $i++) {
+                $code = Test-SiteViaIp $dom $candidates[$i]
+                if ($code -gt 0) { $working.Add($candidates[$i]) }
+            }
+
+            if ($working.Count -gt 0) {
+                $finalIp = $working | Get-Random
+                $source = "STATIC (Balanced)"
+            } elseif ($candidates.Count -gt 0) {
+                $finalIp = $candidates[0]
+                $source = "STATIC (Skip Check)"
             }
         }
-        Write-Host "+$added" -ForegroundColor Green
-    } catch { Write-Host "Пропуск" -ForegroundColor Yellow }
-    Write-Host ""
-}
 
-# ================================================================
-# ШАГ 3: DOMAINLIST.TXT
-# ================================================================
-if (-not (Test-Path $localFile)) {
-    Write-Host "ВНИМАНИЕ: domainlist.txt не найден!" -ForegroundColor Yellow
-} else {
-    Write-Host "[3/4] Резолвим домены..." -ForegroundColor Cyan
-    Write-Host "  [STATIC]=из hosts | [DoH]=DNS-over-HTTPS | [nslookup]=fallback" -ForegroundColor DarkGray
-    Write-Host ""
-
-    $lines        = Get-Content $localFile -Encoding UTF8
-    $processed    = 0; $duplicates = 0; $fromStatic = 0
-    $pendingLines = New-Object System.Collections.Generic.List[string]
-
-    foreach ($line in $lines) {
-        $trimmed = $line.Trim()
-
-        if ([string]::IsNullOrWhiteSpace($trimmed) -or $trimmed.StartsWith('#')) {
-            $pendingLines.Add($trimmed)
-            continue
+        # 2. DNS
+        if (-not $finalIp) {
+            $votes = @{}
+            foreach ($dnsName in $dnsServers.Keys) {
+                $ips = Resolve-ViaNslookup $dom $dnsServers[$dnsName]
+                if ($ips.Count -gt 0) { $ip = $ips[0]; $votes[$ip] = ($votes[$ip] + 1) }
+            }
+            if ($votes.Count -gt 0) {
+                $best = $votes.GetEnumerator() | Sort-Object Value -Descending | Select-Object -First 1
+                $finalIp = $best.Name
+                $source = "DNS"
+            } else {
+                $inherited = Get-InheritedIp $dom $processedDomains
+                if ($inherited) { $finalIp = $inherited; $source = "INHERITED" }
+            }
         }
+
+        if ($finalIp) {
+            $processedDomains[$dom] = $finalIp
+            $color = if ($source -match "STATIC") { 'Green' } elseif ($source -match "INHERIT") { 'Magenta' } else { 'Cyan' }
+            Write-Host "  [$source] $dom -> $finalIp" -ForegroundColor $color
+        } else {
+            Write-Host "  [FAIL]      $dom" -ForegroundColor DarkGray
+        }
+    }
+}
+Write-Host ""
+
+#================================================================
+# ШАГ 3: CORE_DOMAINS + BRUTEFORCE
+#================================================================
+Write-Host "[3/4] Проверка Core + Bruteforce..." -ForegroundColor Cyan
+$ok=0; $warn=0; $fail=0; $bruteFound=0
+$proxyList = @($proxyIpSet) 
+
+foreach ($site in $finalCheckDomains) {
+    $site = $site.ToLower().Trim()
+    
+    if ($processedDomains.ContainsKey($site)) {
+        $ip = $processedDomains[$site]
+        $code = Test-SiteViaIp $site $ip 10
+        
+        $statusText = "ERR"
+        $color = 'Red'
+        
+        if ($code -match '^(200|301|302|403|405|451)$') { 
+            $statusText = "OK"; $color = 'Green'; $ok++ 
+        } elseif ($code -gt 0) { 
+            $statusText = "WRN"; $color = 'Yellow'; $warn++ 
+        } else { 
+            $fail++ 
+        }
+
+        Write-Host ("  [{0,-3}] {1,-42} -> {2}" -f $statusText, $site, $ip) -ForegroundColor $color
+    } 
+    else {
+        Write-Host ("  [SCAN] {0,-42} ... поиск ..." -f $site) -ForegroundColor Yellow
+        $foundIp = $null
+        
+        foreach ($pip in $proxyList) {
+            $code = Test-SiteViaIp $site $pip
+            if ($code -match '^(200|301|302|403|405)$') { 
+                $foundIp = $pip; break 
+            }
+        }
+
+        if ($foundIp) {
+            $processedDomains[$site] = $foundIp
+            $bruteFound++
+            Write-Host ("       => FOUND: {0}" -f $foundIp) -ForegroundColor Cyan
+        } else {
+            Write-Host "       => NONE WORK" -ForegroundColor Red
+        }
+    }
+}
+Write-Host ""
+Write-Host ("  Результат: OK: {0} | Bruteforce Found: {1} | Fail/Skip: {2}" -f $ok, $bruteFound, $fail) -ForegroundColor Cyan
+Write-Host ""
+
+#================================================================
+# ШАГ 4: ЗАПИСЬ ФАЙЛА (СТРУКТУРА СОХРАНЕНА)
+#================================================================
+Write-Host "[4/4] Генерация hosts_merged.txt..." -ForegroundColor Cyan
+$outLines = New-Object System.Collections.Generic.List[string]
+$outLines.Add("# ================================================================")
+$outLines.Add("# Generated : $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+$outLines.Add("# Mode      : Structure Preserved + Load Balanced")
+$outLines.Add("# ================================================================")
+$outLines.Add("")
+
+$writtenDomains = New-Object System.Collections.Generic.HashSet[string]([System.StringComparer]::OrdinalIgnoreCase)
+
+# Проходимся по оригинальному файлу, сохраняя комментарии и пустые строки
+if (Test-Path $localFile) {
+    foreach ($line in (Get-Content $localFile -Encoding UTF8)) {
+        $trimmed = $line.Trim()
+        
+        # Пустые строки и комментарии (разделы) пишем как есть
+        if ([string]::IsNullOrWhiteSpace($trimmed)) { $outLines.Add(""); continue }
+        if ($trimmed.StartsWith('#')) { $outLines.Add($trimmed); continue }
 
         $dom = ($trimmed -replace '^https?://', '' -replace '[/\?#].*$', '').ToLower().Trim()
         if ([string]::IsNullOrEmpty($dom)) { continue }
 
-        if (-not $seenDomains.Add($dom)) { $duplicates++; continue }
+        # Дедупликация
+        if (-not $writtenDomains.Add($dom)) { continue }
 
-        $processed++
-        if ($staticIpMap.ContainsKey($dom)) { $fromStatic++ }
-
-        if ($deepScan -and ($dom -split '\.').Count -eq 2 -and $deepScannedRoots.Add($dom)) {
-            $subs = Get-ExternalSubdomains $dom
-            foreach ($s in $subs) {
-                $sLow = $s.ToLower().Trim()
-                if ($sLow -and $seenDomains.Add($sLow)) {
-                    $entry = Resolve-DomainEntry $sLow
-                    if ($null -ne $entry) { $discoveredHosts.Add($entry) }
-                    else { $notFoundDomains.Add($sLow) }
-                }
+        # Если IP найден в шаге 2 или 3
+        if ($processedDomains.ContainsKey($dom)) {
+            $ip = [string]$processedDomains[$dom]
+            # Жесткая проверка формата IP перед записью
+            if ($ip -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$') {
+                # PadRight безопаснее чем -f, не крашится на спецсимволах
+                $outLines.Add($ip.PadRight(20) + $dom)
             }
         }
-
-        $entry = Resolve-DomainEntry $dom
-
-        if ($null -ne $entry) {
-            foreach ($p in $pendingLines) { $finalHosts.Add($p) }
-            $pendingLines.Clear()
-            $finalHosts.Add($entry)
-            $ip = [string](($entry -split '\s+')[0])
-            $finalHostsMap[$dom] = $ip
-        } else {
-            $notFoundDomains.Add($dom)
-        }
-    }
-
-    Write-Host ""
-    Write-Host ("  Обработано : {0}  |  Из статики : {1}  |  Дублей : {2}  |  NOT FOUND : {3}" -f `
-        $processed, $fromStatic, $duplicates, $notFoundDomains.Count) -ForegroundColor Cyan
-    Write-Host ""
-}
-
-# ================================================================
-# АППЕНД: Discovered (Deep Scan)
-# ================================================================
-if ($discoveredHosts.Count -gt 0) {
-    $finalHosts.Add("")
-    $finalHosts.Add("# ================================================================")
-    $finalHosts.Add("# DISCOVERED via crt.sh ($($discoveredHosts.Count) новых субдоменов)")
-    $finalHosts.Add("# ================================================================")
-    foreach ($e in $discoveredHosts) {
-        $finalHosts.Add($e)
-        $parts = $e -split '\s+'
-        if ($parts.Count -ge 2) { $finalHostsMap[$parts[1]] = [string]$parts[0] }
+        # Если IP не найден - пропускаем строку (не ломая структуру сверху/снизу)
     }
 }
 
-if ($notFoundDomains.Count -gt 0) {
-    Write-Host "  NOT FOUND ($($notFoundDomains.Count)):" -ForegroundColor DarkGray
-    foreach ($d in ($notFoundDomains | Sort-Object)) { Write-Host ("    {0}" -f $d) -ForegroundColor DarkGray }
-    Write-Host ""
-}
+$outLines | Out-File $mergedFile -Encoding UTF8 -Force
 
-# ================================================================
-# СОХРАНЕНИЕ (до финального теста)
-# ================================================================
-$finalHosts | Out-File $mergedFile -Encoding UTF8 -Force
-
-# ================================================================
-# ШАГ 4: ФИНАЛЬНАЯ ПРОВЕРКА
-# curl --resolve: проверяем именно bypass IP.
-# Proxy IP (77.239.114.0, 45.155.204.190 и т.д.) не тестируются
-# curl-ом снаружи России — помечаем как PROXY (ожидаемо).
-# ================================================================
-Write-Host "[4/4] Финальная проверка ($($finalCheckDomains.Count) доменов)..." -ForegroundColor Cyan
-Write-Host "  PROXY = bypass-прокси, тест curl снаружи РФ невозможен (это норма)" -ForegroundColor DarkGray
-Write-Host ""
-$ok = 0; $proxy = 0; $fail = 0; $skip = 0
-
-foreach ($site in $finalCheckDomains) {
-    $hostsIp = $finalHostsMap[$site]
-    $label   = "  [{0,-15}] {1,-42}" -f $hostsIp, $site
-
-    if (-not $hostsIp) {
-        Write-Host ("  {0,-60} НЕТ В HOSTS" -f $site) -ForegroundColor DarkGray
-        $skip++; continue
-    }
-
-    # Bypass proxy IPs — не тестируем curl снаружи, это прокси
-    if ($proxyIpSet.Contains($hostsIp)) {
-        Write-Host ("{0} PROXY" -f $label) -ForegroundColor Cyan
-        $proxy++; continue
-    }
-
-    $code = (& curl.exe -s -o NUL -I -w "%{http_code}" --max-time 6 -A $userAgent `
-             --resolve "${site}:443:${hostsIp}" --resolve "${site}:80:${hostsIp}" `
-             "https://$site" 2>$null) -replace '\s', ''
-
-    if ($code -match '^(200|301|302|304|307|308|401|403|405|451)$') {
-        Write-Host ("{0} OK  ({1})" -f $label, $code) -ForegroundColor Green; $ok++
-    } elseif ($code -match '^(400|5\d{2})$') {
-        Write-Host ("{0} WARN ({1})" -f $label, $code) -ForegroundColor Yellow; $fail++
-    } else {
-        Write-Host ("{0} FAIL ({1})" -f $label, $code) -ForegroundColor Red; $fail++
-    }
-}
-
-Write-Host ""
-Write-Host ("  OK: {0} | PROXY (норма): {1} | FAIL: {2} | Нет в hosts: {3}" -f $ok, $proxy, $fail, $skip) -ForegroundColor Cyan
-Write-Host ""
-
-# ================================================================
-# ИТОГ
-# ================================================================
-$elapsed       = (Get-Date) - $scriptStart
-$elapsedStr    = Format-Duration ([int]$elapsed.TotalSeconds)
-$resolvedCount = @($finalHosts | Where-Object { $_ -match '^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}' }).Count
-
-Write-Host "  ┌──────────────────────────────────────────────┐" -ForegroundColor Yellow
-Write-Host ("  │  Записей в hosts  : {0,-26}│" -f $resolvedCount) -ForegroundColor Yellow
-Write-Host ("  │  Из статич. баз   : {0,-26}│" -f $fromStatic) -ForegroundColor Yellow
-Write-Host ("  │  Не разрешено     : {0,-26}│" -f $notFoundDomains.Count) -ForegroundColor Yellow
-Write-Host ("  │  Время выполнения : {0,-26}│" -f $elapsedStr) -ForegroundColor Yellow
-Write-Host "  │  hosts_merged.txt                            │" -ForegroundColor Yellow
-Write-Host "  └──────────────────────────────────────────────┘" -ForegroundColor Yellow
-
-if ($openPath) {
+$elapsed = (Get-Date) - $scriptStart
+$sec = [int]$elapsed.TotalSeconds
+$finalCount = ($outLines | Where-Object { $_ -match '^\d{1,3}\.' }).Count
+Write-Host ("  Готово за {0}с | Записей: {1}" -f $sec, $finalCount) -ForegroundColor Yellow
+if ((Test-Path "hosts_merged.txt") -and (Get-Item "hosts_merged.txt").Length -gt 1KB) {
     & explorer.exe /select,"$mergedFile"
-    & explorer.exe "C:\Windows\System32\drivers\etc"
 }
