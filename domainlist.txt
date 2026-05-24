@@ -1,7 +1,11 @@
 # --- QwenAI ---
 chat.qwen.ai
 qwen.ai
-
+# ---Brave ---
+brave.com
+p3a.brave.com
+bcl.brave.com
+search.brave.com
 # --- OpenAI ChatGPT ---
 cdn.auth0.com
 ab.chatgpt.com
